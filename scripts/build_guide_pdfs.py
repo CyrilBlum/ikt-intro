@@ -80,7 +80,7 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
             shortcut_p = Paragraph(shortcut, ParagraphStyle("shortcut",fontName="Helvetica-Bold",fontSize=25,leading=30,textColor=PALE))
             _, sh = shortcut_p.wrap(92*mm,75*mm); shortcut_p.drawOn(c,left_x+12*mm,left_y+72*mm-sh/2)
             c.setFillColor(white); c.setFont("Helvetica-Bold",10)
-            card_label = "VORAUSSETZUNG · KG / HMS" if platform == "BYOD" else ("SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS")
+            card_label = "VORAUSSETZUNG · KG / HMS" if platform == "BYOD" else ("STECKBRIEF · KURZPROFIL" if title.startswith("Steckbrief") else ("SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS"))
             c.drawString(left_x+12*mm,left_y+16*mm,card_label)
         rx = 143*mm
         title_p = Paragraph(safe(step["title"]), ParagraphStyle("title",fontName="Helvetica-Bold",fontSize=25,leading=27,textColor=INK))
@@ -112,6 +112,7 @@ def main():
     made.append(make_pdf("window-management-macos.pdf","Window-Management-Challenge",parse_steps("challengeMac"),platform="macOS"))
     made.append(make_pdf("shortcut-challenge-windows.pdf","Shortcut-Challenge",parse_steps("shortcutsWindows"),platform="Windows"))
     made.append(make_pdf("shortcut-challenge-macos.pdf","Shortcut-Challenge",parse_steps("shortcutsMac"),platform="macOS"))
+    made.append(make_pdf("steckbrief-challenge.pdf","Steckbrief-Challenge",parse_steps("profile"),platform="KG / HMS"))
     print("\n".join(str(p) for p in made))
 
 if __name__ == "__main__": main()

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Step = { image?: string; altImage?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string };
-type GuideKey = "eduzh" | "wlan" | "apps" | "challenge" | "shortcuts";
+type GuideKey = "eduzh" | "wlan" | "apps" | "challenge" | "shortcuts" | "profile";
 
 const eduzh: Step[] = [
   { image:"/screenshots/appstore-01-suchen.png", altImage:"/screenshots/android-01-suchen.png", phase:"Vorbereiten", title:"Microsoft Authenticator suchen", text:"Öffnen Sie den App Store oder Google Play Store und suchen Sie nach «Microsoft Authenticator». Für die ganze Einrichtung benötigen Sie nur Ihr Smartphone – keinen Computer." },
@@ -112,7 +112,21 @@ const shortcutsMac: Step[] = [
   {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopieren Sie Text, finden Sie ein Wort, wechseln Sie die App, öffnen Sie einen Browser-Tab und stellen Sie einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
+const profile: Step[] = [
+  {phase:"Auftrag",title:"Ihr digitales Kurzprofil",text:"Erstellen Sie ein digitales Kurzprofil über sich. Ihre Lehrpersonen sowie Ihre Mitschülerinnen und Mitschüler sollen einen ersten Eindruck davon erhalten, wer Sie sind und was Sie als Person ausmacht.",shortcut:"ICH"},
+  {phase:"Grundangaben",title:"Wer sind Sie?",text:"Nennen Sie Ihren Vor- und Nachnamen sowie Ihre Klasse. Ergänzen Sie ein Foto von sich, drei Wörter, die Sie beschreiben, etwas, das man über Sie wissen sollte, etwas, das Sie motiviert, und eine Stärke, die Sie in die Klasse einbringen.",shortcut:"01"},
+  {phase:"Persönliches",title:"Was passt zu Ihnen?",text:"Ergänzen Sie ein Ziel für dieses Schuljahr, einen Ort, an dem Sie sich wohlfühlen, und einen Gegenstand, Song, Film, ein Game, eine Sportart, ein Hobby oder ein Zitat, das zu Ihnen passt. Begründen Sie Ihre Wahl kurz und nennen Sie einen Fun Fact, den Sie teilen möchten.",shortcut:"02",tip:"Weitere passende Informationen dürfen Sie gerne ergänzen."},
+  {phase:"Werkzeug",title:"Gestaltungsform wählen",text:"Sie entscheiden selbst über die Gestaltung. Möglich sind beispielsweise eine OneNote-Seite, Word, PowerPoint, Canva oder ein anderes vertrautes Programm. Wenn Sie mit Word noch unsicher sind, können Sie die vorbereitete Vorlage verwenden.",shortcut:"APP"},
+  {phase:"Gestaltung",title:"Übersichtlich und persönlich",text:"Gestalten Sie Ihr Kurzprofil gut lesbar und ansprechend. Bilder, Symbole und Emojis sind ausdrücklich erwünscht und können unterhalb der Liste oder passend neben einzelnen Punkten eingefügt werden.",shortcut:"Aa"},
+  {phase:"Sicherheit",title:"Privates bleibt privat",text:"Teilen Sie nur Informationen, die Lehrpersonen und die Klasse sehen dürfen. Adresse, Telefonnummer, private Social-Media-Profile und sehr persönliche Angaben gehören nicht in das Kurzprofil.",shortcut:"🔒"},
+  {phase:"Eigenleistung",title:"Die Inhalte stammen von Ihnen",text:"Das Kurzprofil soll von Ihnen selbst erstellt werden. Vollständig KI-generierte Profile sind nicht erlaubt. Digitale Hilfsmittel für Gestaltung, Rechtschreibung oder Layout sind erlaubt; die persönlichen Inhalte müssen jedoch von Ihnen stammen und wirklich zu Ihnen passen.",shortcut:"✓"},
+  {phase:"Abgabe",title:"Speichern und in Teams ablegen",text:"Speichern Sie die fertige Datei als Klasse_Nachname_Vorname_Kurzprofil. Legen Sie sie anschliessend im Klassen-Team im Kanal «Kursvorstellungen» ab.",shortcut:"SAVE",tip:"Kontrollieren Sie vor der Abgabe noch einmal Dateiname, Lesbarkeit und Inhalt."},
+  {phase:"Bonus",title:"Bonus für schnelle Profis",text:"Fügen Sie ein passendes Symbol, Emoji oder kleines Bild ein, nutzen Sie passende Farben und schreiben Sie zu mindestens einem Punkt einen kurzen Satz statt nur eines Wortes. Wenn Sie fertig sind, helfen Sie einer Person in Ihrer Nähe.",shortcut:"+"},
+];
+
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",profile:"Steckbrief-Challenge"};
+const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",wlan:"/wlan",apps:"/microsoft-365",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",profile:"/challenges/steckbrief"};
+const pathGuides: Record<string,GuideKey> = Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])) as Record<string,GuideKey>;
 
 export default function Home() {
   const [intro,setIntro]=useState(true);
@@ -125,14 +139,15 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer]);
+  const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="profile"?profile:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer]);
   const step=steps[current]||steps[0];
   const image=guide==="eduzh"&&phone==="android"?step.altImage:step.image;
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`;
-  const choose=(key:GuideKey)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`;
+  const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
   useEffect(()=>{const timer=window.setTimeout(()=>setHeaderHidden(true),3600);return()=>window.clearTimeout(timer)},[]);
+  useEffect(()=>{const applyPath=()=>{const key=pathGuides[window.location.pathname.replace(/\/$/,"")||"/"];if(key)openGuide(key,false);else setIntro(true)};applyPath();window.addEventListener("popstate",applyPath);return()=>window.removeEventListener("popstate",applyPath)},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setQrOpen(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,steps.length]);
   const finishSwipe=(event:React.PointerEvent)=>{
     if(!swipeStart.current)return;
@@ -151,10 +166,10 @@ export default function Home() {
     <aside className={`drawer ${menu?"open":""}`} aria-hidden={!menu}>
       <button className="drawer-close" onClick={()=>setMenu(false)} aria-label="Menü schliessen">×</button>
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
-      <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
+      <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
       {(Object.keys(guideNames) as GuideKey[]).map((key,i)=>{
-        const isChallenge=key==="challenge"||key==="shortcuts";
-        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>choose(key)}><span>0{i+1}</span><b>{isChallenge&&<em>Challenge</em>}{guideNames[key]}</b></button>
+        const isChallenge=key==="challenge"||key==="shortcuts"||key==="profile";
+        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>0{i+1}</span><b>{isChallenge&&<em>Challenge</em>}{guideNames[key]}</b></button>
       })}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
     </aside>
@@ -166,7 +181,7 @@ export default function Home() {
         <img src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/>
         <h1>IKT-Einführung</h1>
         <p>Wählen Sie eine Anleitung im Menü oder beginnen Sie mit dem EduZH-Erstlogin.</p>
-        <button onClick={()=>choose("eduzh")}>Mit EduZH beginnen <span>→</span></button>
+        <button onClick={()=>openGuide("eduzh")}>Mit EduZH beginnen <span>→</span></button>
       </div>
       <aside className="wifi-card">
         <img src="/wifi.svg" alt="QR-Code für das WLAN"/>
@@ -181,7 +196,7 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="apps"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
@@ -191,6 +206,7 @@ export default function Home() {
         {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
+        {guide==="profile"&&current===3&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Vorlage herunterladen ↓</a>}
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinden Sie unbedingt Ihr eigenes Beispiel und verwenden Sie es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
