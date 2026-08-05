@@ -116,6 +116,11 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
     out = OUTPUT / filename
     w, h = A4
     c = canvas.Canvas(str(out), pagesize=(w,h), pageCompression=1)
+    document_title = f"{title} - {platform}" if platform else title
+    c.setTitle(document_title)
+    c.setAuthor("Cyril Blum · Kantonsschule Stadelhofen · Filiale Dübendorf")
+    c.setSubject("IKT-Einführung")
+    c.setCreator("IKT-Einführung KST FDU")
     total_pages = (len(steps)+1)//2
     for page_idx in range(total_pages):
         c.setFillColor(PAPER); c.rect(0,0,w,h,fill=1,stroke=0)
