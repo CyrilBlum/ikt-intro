@@ -80,7 +80,8 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
             shortcut_p = Paragraph(shortcut, ParagraphStyle("shortcut",fontName="Helvetica-Bold",fontSize=25,leading=30,textColor=PALE))
             _, sh = shortcut_p.wrap(92*mm,75*mm); shortcut_p.drawOn(c,left_x+12*mm,left_y+72*mm-sh/2)
             c.setFillColor(white); c.setFont("Helvetica-Bold",10)
-            c.drawString(left_x+12*mm,left_y+16*mm,"SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS")
+            card_label = "VORAUSSETZUNG · KG / HMS" if platform == "BYOD" else ("SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS")
+            c.drawString(left_x+12*mm,left_y+16*mm,card_label)
         rx = 143*mm
         title_p = Paragraph(safe(step["title"]), ParagraphStyle("title",fontName="Helvetica-Bold",fontSize=25,leading=27,textColor=INK))
         _, th = title_p.wrap(136*mm,55*mm); title_p.drawOn(c,rx,h-46*mm-th)

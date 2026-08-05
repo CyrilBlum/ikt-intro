@@ -42,6 +42,7 @@ const wlanMac: Step[] = [
 ];
 
 const apps: Step[] = [
+  {phase:"Voraussetzung",title:"BYOD-Installation abschliessen",text:"Diese Anleitung richtet sich an KG- und HMS-Lernende. Bevor Sie Teams, Outlook und OneDrive einrichten, muss die vollständige BYOD-Softwareinstallation auf Ihrem Computer abgeschlossen sein.",tip:"Falls noch Programme fehlen, führen Sie zuerst die BYOD-Installation gemäss den verlinkten Installationsanleitungen durch.",shortcut:"BYOD ✓"},
   {image:"/screenshots/apps/step-009.jpg",phase:"Teams",title:"Schulkonto hinzufügen",text:"Öffnen Sie in Teams Ihr Profil und wählen Sie «Weiteres Konto hinzufügen»."},
   {image:"/screenshots/apps/step-012.png",phase:"Teams",title:"EduZH-Adresse eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch ein und klicken Sie auf «Weiter»."},
   {image:"/screenshots/apps/step-013.jpg",phase:"Teams",title:"Anmelden",text:"Geben Sie Ihr Kennwort ein und bestätigen Sie die Anmeldung im Authenticator."},
@@ -150,7 +151,10 @@ export default function Home() {
       <button className="drawer-close" onClick={()=>setMenu(false)} aria-label="Menü schliessen">×</button>
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
       <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
-      {(Object.keys(guideNames) as GuideKey[]).map((key,i)=><button key={key} className={!intro&&guide===key?"active":""} onClick={()=>choose(key)}><span>0{i+1}</span><b>{guideNames[key]}</b></button>)}
+      {(Object.keys(guideNames) as GuideKey[]).map((key,i)=>{
+        const isChallenge=key==="challenge"||key==="shortcuts";
+        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>choose(key)}><span>0{i+1}</span><b>{isChallenge&&<em>Challenge</em>}{guideNames[key]}</b></button>
+      })}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
     </aside>
 
@@ -177,7 +181,7 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="apps"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
@@ -186,6 +190,7 @@ export default function Home() {
         {guide==="eduzh"&&current===1&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
         {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
+        {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinden Sie unbedingt Ihr eigenes Beispiel und verwenden Sie es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
