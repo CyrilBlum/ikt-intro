@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Step = { image?: string; altImage?: string; phase: string; title: string; text: string; tip?: string };
 type GuideKey = "eduzh" | "wlan" | "apps" | "challenge";
@@ -82,19 +82,27 @@ export default function Home() {
   const [computer,setComputer]=useState<"windows"|"mac">("windows");
   const [menu,setMenu]=useState(false);
   const [zoom,setZoom]=useState(false);
+  const swipeStart=useRef<{x:number;y:number}|null>(null);
   const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):(computer==="windows"?challengeWindows:challengeMac),[guide,computer]);
   const step=steps[current]||steps[0];
   const image=guide==="eduzh"&&phone==="android"?step.altImage:step.image;
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`;
   const choose=(key:GuideKey)=>{setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[steps.length]);
+  const finishSwipe=(event:React.PointerEvent)=>{
+    if(!swipeStart.current)return;
+    const dx=event.clientX-swipeStart.current.x,dy=event.clientY-swipeStart.current.y;
+    swipeStart.current=null;
+    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2)go(current+(dx<0?1:-1));
+  };
 
   return <main>
     <header className="topbar">
       <button className="menu-button" onClick={()=>setMenu(true)} aria-label="Anleitungen öffnen"><span>☰</span> Anleitungen</button>
       <a className="brand" href="#top"><img className="official-logo" src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/></a>
-      <div className="header-info"><span>IKT-Einführung</span><strong>← → navigieren</strong></div>
+      <div className="header-info"><span>IKT-Einführung</span><strong><span className="desktop-hint">← → navigieren</span><span className="mobile-hint">↔ wischen</span></strong></div>
     </header>
     <div className={`drawer-shade ${menu?"open":""}`} onClick={()=>setMenu(false)}/>
     <aside className={`drawer ${menu?"open":""}`} aria-hidden={!menu}>
@@ -110,7 +118,7 @@ export default function Home() {
       <div className="dots">{steps.map((s,i)=><button key={`${s.title}-${i}`} onClick={()=>go(i)} className={i===current?"active":i<current?"done":""} aria-label={`Schritt ${i+1}: ${s.title}`}><span>{i+1}</span></button>)}</div>
     </nav>
 
-    <section className={`guide ${!image?"challenge-guide":""}`} id="top">
+    <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
         {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{current===steps.length-1?"✓":"⌘"}</b><p>KG · HMS</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
@@ -124,7 +132,8 @@ export default function Home() {
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinde unbedingt dein eigenes Beispiel und verwende es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
-        <p className="keyboard">Du kannst auch mit den Pfeiltasten navigieren.</p>
+        <a className="pdf-download" href={pdfHref} download>↓ Aktuelle Anleitung als PDF</a>
+        <p className="keyboard"><span className="desktop-hint">Mit den Pfeiltasten navigieren.</span><span className="mobile-hint">Nach links oder rechts wischen.</span></p>
       </article>
     </section>
     <img className="bottom-decoration" src="/glatt-linie-footer.png" alt="" aria-hidden="true"/>
