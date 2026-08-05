@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "EduZH-Erstlogin | IKT-Einführung",
-  description: "EduZH-Konto nur mit dem iPhone einrichten – ohne Laptop.",
+  description: "EduZH-Konto mit iPhone oder Android einrichten – ohne Laptop.",
   openGraph: {
     title: "EduZH-Erstlogin",
-    description: "Kein Laptop nötig",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "EduZH-Start auf dem iPhone – Kein Laptop nötig" }],
+    description: "iPhone oder Android",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "EduZH-Start – iPhone oder Android" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "EduZH-Erstlogin",
-    description: "Kein Laptop nötig",
+    description: "iPhone oder Android",
     images: ["/og.png"],
   },
   icons: {
