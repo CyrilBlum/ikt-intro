@@ -120,6 +120,7 @@ export default function Home() {
   const [computer,setComputer]=useState<"windows"|"mac">("windows");
   const [menu,setMenu]=useState(false);
   const [zoom,setZoom]=useState(false);
+  const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer]);
   const step=steps[current]||steps[0];
@@ -128,6 +129,7 @@ export default function Home() {
   const choose=(key:GuideKey)=>{setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
+  useEffect(()=>{const timer=window.setTimeout(()=>setHeaderHidden(true),3600);return()=>window.clearTimeout(timer)},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[steps.length]);
   const finishSwipe=(event:React.PointerEvent)=>{
     if(!swipeStart.current)return;
@@ -137,8 +139,8 @@ export default function Home() {
   };
 
   return <main>
-    <header className="topbar">
-      <button className="menu-button" onClick={()=>setMenu(true)} aria-label="Anleitungen öffnen"><span>☰</span> Anleitungen</button>
+    <button className="menu-button" onClick={()=>setMenu(true)} aria-label="Anleitungen öffnen"><span>☰</span><b>Anleitungen</b></button>
+    <header className={`topbar ${headerHidden?"hidden":""}`} onClick={()=>setHeaderHidden(false)}>
       <a className="brand" href="#top"><img className="official-logo" src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/></a>
       <div className="header-info"><span>IKT-Einführung</span><strong><span className="desktop-hint">← → navigieren</span><span className="mobile-hint">↔ wischen</span></strong></div>
     </header>
