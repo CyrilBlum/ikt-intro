@@ -114,6 +114,7 @@ const shortcutsMac: Step[] = [
 const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
 
 export default function Home() {
+  const [intro,setIntro]=useState(true);
   const [guide,setGuide]=useState<GuideKey>("eduzh");
   const [current,setCurrent]=useState(0);
   const [phone,setPhone]=useState<"iphone"|"android">("iphone");
@@ -126,11 +127,11 @@ export default function Home() {
   const step=steps[current]||steps[0];
   const image=guide==="eduzh"&&phone==="android"?step.altImage:step.image;
   const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`;
-  const choose=(key:GuideKey)=>{setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
+  const choose=(key:GuideKey)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
   useEffect(()=>{const timer=window.setTimeout(()=>setHeaderHidden(true),3600);return()=>window.clearTimeout(timer)},[]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[steps.length]);
+  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,steps.length]);
   const finishSwipe=(event:React.PointerEvent)=>{
     if(!swipeStart.current)return;
     const dx=event.clientX-swipeStart.current.x,dy=event.clientY-swipeStart.current.y;
@@ -139,23 +140,39 @@ export default function Home() {
   };
 
   return <main>
-    <button className="menu-button" onClick={()=>setMenu(true)} aria-label="Anleitungen öffnen"><span>☰</span><b>Anleitungen</b></button>
-    <header className={`topbar ${headerHidden?"hidden":""}`} onClick={()=>setHeaderHidden(false)}>
+    <button className={`menu-button ${headerHidden&&!intro?"on-paper":""}`} onClick={()=>setMenu(true)} aria-label="Anleitungen öffnen"><span>☰</span><b>Anleitungen</b></button>
+    {!intro&&<header className={`topbar ${headerHidden?"hidden":""}`} onClick={()=>setHeaderHidden(false)}>
       <a className="brand" href="#top"><img className="official-logo" src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/></a>
       <div className="header-info"><span>IKT-Einführung</span><strong><span className="desktop-hint">← → navigieren</span><span className="mobile-hint">↔ wischen</span></strong></div>
-    </header>
+    </header>}
     <div className={`drawer-shade ${menu?"open":""}`} onClick={()=>setMenu(false)}/>
     <aside className={`drawer ${menu?"open":""}`} aria-hidden={!menu}>
       <button className="drawer-close" onClick={()=>setMenu(false)} aria-label="Menü schliessen">×</button>
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
-      {(Object.keys(guideNames) as GuideKey[]).map((key,i)=><button key={key} className={guide===key?"active":""} onClick={()=>choose(key)}><span>0{i+1}</span><b>{guideNames[key]}</b></button>)}
+      <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
+      {(Object.keys(guideNames) as GuideKey[]).map((key,i)=><button key={key} className={!intro&&guide===key?"active":""} onClick={()=>choose(key)}><span>0{i+1}</span><b>{guideNames[key]}</b></button>)}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
     </aside>
 
+    {intro?<section className="intro" id="top">
+      <img className="intro-photo" src="/fdu-campus.jpg" alt="Schulhaus der Kantonsschule Stadelhofen, Filiale Dübendorf"/>
+      <div className="intro-shade"/>
+      <div className="intro-copy">
+        <img src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/>
+        <p className="intro-kicker">IKT-EINFÜHRUNG</p>
+        <h1>Gut vorbereitet<br/>in den Schulalltag.</h1>
+        <p>Richten Sie Ihr EduZH-Konto ein, verbinden Sie Ihr Gerät mit dem WLAN und lernen Sie die wichtigsten digitalen Werkzeuge kennen.</p>
+        <button onClick={()=>choose("eduzh")}>Einführung starten <span>→</span></button>
+      </div>
+      <aside className="wifi-card">
+        <img src="/wifi.svg" alt="QR-Code für das WLAN"/>
+        <div><strong>Kein mobiles Internet?</strong><p>Scannen Sie diesen QR-Code, um sich zuerst mit dem bereitgestellten WLAN zu verbinden.</p></div>
+      </aside>
+      <p className="intro-menu-hint">Alle Anleitungen finden Sie über das Menü oben links.</p>
+    </section>:<>
     <nav className="progress" aria-label="Fortschritt">
       <div className="progress-copy"><span>{guideNames[guide]}</span><strong>{current+1} / {steps.length}</strong></div>
       <div className="bar"><i style={{width:`${((current+1)/steps.length)*100}%`}}/></div>
-      <div className="dots">{steps.map((s,i)=><button key={`${s.title}-${i}`} onClick={()=>go(i)} className={i===current?"active":i<current?"done":""} aria-label={`Schritt ${i+1}: ${s.title}`}><span>{i+1}</span></button>)}</div>
     </nav>
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
@@ -176,6 +193,7 @@ export default function Home() {
         <p className="keyboard"><span className="desktop-hint">Mit den Pfeiltasten navigieren.</span><span className="mobile-hint">Nach links oder rechts wischen.</span></p>
       </article>
     </section>
+    </>}
     <img className="bottom-decoration" src="/glatt-linie-footer.png" alt="" aria-hidden="true"/>
     <footer><strong>© 2026 Cyril Blum</strong><span>Kantonsschule Stadelhofen · Filiale Dübendorf</span></footer>
     {zoom&&image&&<div className="lightbox" role="dialog" aria-modal="true" onClick={()=>setZoom(false)}><button aria-label="Schliessen">×</button><img src={image} alt=""/></div>}
