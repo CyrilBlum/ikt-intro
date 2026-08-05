@@ -76,8 +76,11 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
             draw_image(c, ROOT / "public" / image_rel.lstrip("/"), left_x, left_y, left_w, left_h)
         else:
             c.setFillColor(TEAL); c.roundRect(left_x,left_y,left_w,left_h,4*mm,fill=1,stroke=0)
-            c.setFillColor(PALE); c.setFont("Helvetica-Bold",58); c.drawString(left_x+13*mm,left_y+58*mm,"MAC" if platform=="macOS" else "WIN")
-            c.setFillColor(white); c.setFont("Helvetica-Bold",12); c.drawString(left_x+12*mm,left_y+16*mm,"WINDOW MANAGEMENT · KG / HMS")
+            shortcut = safe(step.get("shortcut") or ("MAC" if platform=="macOS" else "WIN"))
+            shortcut_p = Paragraph(shortcut, ParagraphStyle("shortcut",fontName="Helvetica-Bold",fontSize=25,leading=30,textColor=PALE))
+            _, sh = shortcut_p.wrap(92*mm,75*mm); shortcut_p.drawOn(c,left_x+12*mm,left_y+72*mm-sh/2)
+            c.setFillColor(white); c.setFont("Helvetica-Bold",10)
+            c.drawString(left_x+12*mm,left_y+16*mm,"SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS")
         rx = 143*mm
         title_p = Paragraph(safe(step["title"]), ParagraphStyle("title",fontName="Helvetica-Bold",fontSize=25,leading=27,textColor=INK))
         _, th = title_p.wrap(136*mm,55*mm); title_p.drawOn(c,rx,h-46*mm-th)
@@ -106,6 +109,8 @@ def main():
     made.append(make_pdf("microsoft-365.pdf","Teams, Outlook & OneDrive",parse_steps("apps"),platform="BYOD"))
     made.append(make_pdf("window-management-windows.pdf","Window-Management-Challenge",parse_steps("challengeWindows"),platform="Windows"))
     made.append(make_pdf("window-management-macos.pdf","Window-Management-Challenge",parse_steps("challengeMac"),platform="macOS"))
+    made.append(make_pdf("shortcut-challenge-windows.pdf","Shortcut-Challenge",parse_steps("shortcutsWindows"),platform="Windows"))
+    made.append(make_pdf("shortcut-challenge-macos.pdf","Shortcut-Challenge",parse_steps("shortcutsMac"),platform="macOS"))
     print("\n".join(str(p) for p in made))
 
 if __name__ == "__main__": main()

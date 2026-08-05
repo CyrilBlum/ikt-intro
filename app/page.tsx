@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Step = { image?: string; altImage?: string; phase: string; title: string; text: string; tip?: string };
-type GuideKey = "eduzh" | "wlan" | "apps" | "challenge";
+type Step = { image?: string; altImage?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string };
+type GuideKey = "eduzh" | "wlan" | "apps" | "challenge" | "shortcuts";
 
 const eduzh: Step[] = [
   { image:"/screenshots/appstore-01-suchen.png", altImage:"/screenshots/android-01-suchen.png", phase:"Vorbereiten", title:"Microsoft Authenticator suchen", text:"Öffne den App Store oder Google Play Store und suche nach «Microsoft Authenticator». Du brauchst für die ganze Einrichtung nur dein Smartphone – keinen Computer." },
@@ -61,19 +61,57 @@ const apps: Step[] = [
 ];
 
 const challengeWindows: Step[] = [
-  {phase:"Challenge",title:"Zwei Fenster nebeneinander",text:"Öffne Browser und Datei-Explorer. Drücke Windows-Taste + Pfeil links für das erste und Windows-Taste + Pfeil rechts für das zweite Fenster."},
-  {phase:"Challenge",title:"Zwischen Apps wechseln",text:"Halte Alt gedrückt und tippe wiederholt auf Tab. Wechsle gezielt zwischen Browser, Teams und Explorer."},
-  {phase:"Challenge",title:"Virtuellen Desktop nutzen",text:"Drücke Windows-Taste + Ctrl + D. Öffne dort Outlook. Mit Windows-Taste + Ctrl + Pfeil wechselst du zwischen Desktops."},
-  {phase:"Challenge",title:"Mission erfüllt",text:"Ordne Browser und Explorer nebeneinander an, verschiebe Teams auf einen zweiten Desktop und kehre ohne Maus zum Browser zurück."},
+  {phase:"Tiling",title:"Zwei Fenster nebeneinander",text:"Öffne Browser und Datei-Explorer. Lege den Browser links und den Explorer rechts ab.",shortcut:"Win + ← / →"},
+  {phase:"Tiling",title:"Fenster in eine Ecke legen",text:"Drücke zuerst Win + Pfeil links oder rechts und direkt danach Pfeil hoch oder runter. Ordne vier Fenster als Raster an.",shortcut:"Win + ←, dann ↑"},
+  {phase:"Tiling",title:"Maximieren und verkleinern",text:"Maximiere das aktive Fenster. Drücke danach den Gegenbefehl zweimal, um es wiederherzustellen und zu minimieren.",shortcut:"Win + ↑ / ↓"},
+  {phase:"Snap Layouts",title:"Ein Layout auswählen",text:"Öffne die Snap-Layouts, wähle ein Dreispalten-Layout und verteile Browser, Teams und Explorer.",shortcut:"Win + Z"},
+  {phase:"Apps",title:"Zwischen Programmen wechseln",text:"Halte Alt gedrückt und tippe wiederholt auf Tab. Wechsle gezielt zwischen Browser, Teams und Explorer.",shortcut:"Alt + Tab"},
+  {phase:"Desktops",title:"Virtuellen Desktop erstellen",text:"Erstelle einen neuen Desktop und öffne dort Outlook.",shortcut:"Win + Ctrl + D"},
+  {phase:"Desktops",title:"Zwischen Desktops wechseln",text:"Wechsle ohne Maus zum vorherigen Desktop und wieder zurück.",shortcut:"Win + Ctrl + ← / →"},
+  {phase:"Bildschirme",title:"Fenster auf einen anderen Monitor",text:"Falls ein zweiter Bildschirm vorhanden ist: verschiebe das aktive Fenster dorthin und wieder zurück.",shortcut:"Win + Shift + ← / →"},
+  {phase:"Finale",title:"Windows-Tiling-Mission",text:"Baue ein Dreifenster-Layout, verschiebe Teams auf einen zweiten Desktop und kehre nur mit der Tastatur zum Browser zurück.",shortcut:"Win + Z · Alt + Tab"},
 ];
 const challengeMac: Step[] = [
-  {phase:"Challenge",title:"Zwei Fenster nebeneinander",text:"Öffne Safari und Finder. Halte den grünen Fensterknopf gedrückt und platziere Safari links, Finder rechts."},
-  {phase:"Challenge",title:"Zwischen Apps wechseln",text:"Halte Command gedrückt und tippe wiederholt auf Tab. Wechsle gezielt zwischen Safari, Teams und Finder."},
-  {phase:"Challenge",title:"Neuen Schreibtisch nutzen",text:"Öffne Mission Control mit Control + Pfeil hoch und füge oben einen neuen Schreibtisch hinzu. Öffne dort Outlook."},
-  {phase:"Challenge",title:"Mission erfüllt",text:"Ordne Safari und Finder nebeneinander an, verschiebe Teams auf einen zweiten Schreibtisch und kehre ohne Maus zu Safari zurück."},
+  {phase:"Rectangle",title:"Zwei Fenster nebeneinander",text:"Öffne Safari und Finder. Lege Safari in die linke und Finder in die rechte Bildschirmhälfte.",shortcut:"Ctrl + Option + ← / →",tip:"Dies sind die Rectangle-Standardkürzel. Sie können in Rectangle angepasst worden sein."},
+  {phase:"Rectangle",title:"Fenster in die Ecken legen",text:"Ordne vier Fenster oben links, oben rechts, unten links und unten rechts an.",shortcut:"Ctrl + Option + U / I / J / K"},
+  {phase:"Rectangle",title:"Fenster maximieren",text:"Maximiere das aktive Fenster mit Rectangle und stelle danach die vorherige Grösse wieder her.",shortcut:"Ctrl + Option + Return"},
+  {phase:"Rectangle",title:"Fenster zentrieren",text:"Verkleinere ein Fenster und setze es anschliessend exakt in die Bildschirmmitte.",shortcut:"Ctrl + Option + C"},
+  {phase:"Rectangle",title:"Drei Spalten bauen",text:"Ordne Browser, Teams und Finder im linken, mittleren und rechten Drittel an.",shortcut:"Ctrl + Option + D / F / G"},
+  {phase:"Apps",title:"Zwischen Programmen wechseln",text:"Halte Command gedrückt und tippe auf Tab. Wechsle gezielt zwischen Safari, Teams und Finder.",shortcut:"Command + Tab"},
+  {phase:"Spaces",title:"Neuen Schreibtisch nutzen",text:"Öffne Mission Control, erstelle einen neuen Schreibtisch und öffne dort Outlook.",shortcut:"Ctrl + ↑"},
+  {phase:"Spaces",title:"Zwischen Schreibtischen wechseln",text:"Wechsle ohne Maus zum vorherigen Schreibtisch und wieder zurück.",shortcut:"Ctrl + ← / →"},
+  {phase:"Bildschirme",title:"Fenster zum nächsten Monitor",text:"Falls ein zweiter Bildschirm vorhanden ist: verschiebe das aktive Fenster mit Rectangle dorthin.",shortcut:"Ctrl + Option + Command + →"},
+  {phase:"Finale",title:"Rectangle-Tiling-Mission",text:"Baue ein Dreispalten-Layout, verschiebe Teams auf einen zweiten Schreibtisch und kehre nur mit der Tastatur zu Safari zurück.",shortcut:"D / F / G · Command + Tab"},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge"};
+const shortcutsWindows: Step[] = [
+  {phase:"Navigation",title:"Wortweise durch Text springen",text:"Öffne ein Textdokument. Bewege den Cursor fünf Wörter nach rechts und danach zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Ctrl + ← / →"},
+  {phase:"Markieren",title:"Wörter präzise markieren",text:"Markiere die nächsten drei Wörter ab der Cursorposition. Kopiere noch nichts.",shortcut:"Ctrl + Shift + →"},
+  {phase:"Auswahl",title:"Alles auswählen",text:"Markiere den gesamten Text mit einem einzigen Kürzel und hebe die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Ctrl + A"},
+  {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopiere einen Satz, füge ihn an einer neuen Stelle ein und verschiebe einen zweiten Satz per Ausschneiden.",shortcut:"Ctrl + C / X / V"},
+  {phase:"Bearbeiten",title:"Fehler rückgängig machen",text:"Lösche absichtlich ein Wort, mache die Aktion rückgängig und führe sie danach nochmals aus.",shortcut:"Ctrl + Z · Ctrl + Shift + Z"},
+  {phase:"Dokument",title:"Suchen, speichern, drucken",text:"Suche im Dokument nach einem Wort, speichere und öffne zuletzt den Druckdialog. Brich den Druckdialog wieder ab.",shortcut:"Ctrl + F / S / P"},
+  {phase:"Programme",title:"Fenster wechseln und schliessen",text:"Wechsle zu einem anderen Programm, kehre zurück und schliesse anschliessend ein nicht benötigtes Fenster.",shortcut:"Alt + Tab · Alt + F4"},
+  {phase:"Sicherheit",title:"Computer sperren",text:"Sperre den Computer und melde dich danach wieder an.",shortcut:"Win + L"},
+  {phase:"Browser",title:"Tabs steuern",text:"Öffne zwei neue Tabs, wechsle zum rechten Tab, schliesse ihn und stelle ihn wieder her.",shortcut:"Ctrl + T / Tab / W · Ctrl + Shift + T"},
+  {phase:"Code",title:"Code ein- und ausrücken",text:"Markiere mehrere Codezeilen, rücke sie einmal ein und danach wieder aus.",shortcut:"Tab · Shift + Tab"},
+  {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopiere Text, finde ein Wort, wechsle die App, öffne einen Browser-Tab und stelle einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
+];
+const shortcutsMac: Step[] = [
+  {phase:"Navigation",title:"Wortweise durch Text springen",text:"Öffne ein Textdokument. Bewege den Cursor fünf Wörter nach rechts und danach zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Option + ← / →"},
+  {phase:"Markieren",title:"Wörter präzise markieren",text:"Markiere die nächsten drei Wörter ab der Cursorposition. Kopiere noch nichts.",shortcut:"Option + Shift + →"},
+  {phase:"Auswahl",title:"Alles auswählen",text:"Markiere den gesamten Text mit einem einzigen Kürzel und hebe die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Command + A"},
+  {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopiere einen Satz und füge ihn neu ein. Verschiebe danach eine Datei mit Kopieren und der Einfügen-Variante zum Bewegen.",shortcut:"Command + C / V · Option + Command + V"},
+  {phase:"Bearbeiten",title:"Fehler rückgängig machen",text:"Lösche absichtlich ein Wort, mache die Aktion rückgängig und führe sie danach nochmals aus.",shortcut:"Command + Z · Command + Shift + Z"},
+  {phase:"Dokument",title:"Suchen, speichern, drucken",text:"Suche im Dokument nach einem Wort, speichere und öffne zuletzt den Druckdialog. Brich den Druckdialog wieder ab.",shortcut:"Command + F / S / P"},
+  {phase:"Programme",title:"Programme und Fenster wechseln",text:"Wechsle zu einer anderen App. Wechsle danach zwischen zwei Fenstern derselben App und schliesse die App.",shortcut:"Command + Tab · Command + < · Command + Q"},
+  {phase:"Sicherheit",title:"Computer sperren",text:"Sperre den Mac und melde dich danach wieder an.",shortcut:"Command + Ctrl + Q"},
+  {phase:"Browser",title:"Tabs steuern",text:"Öffne zwei neue Tabs, wechsle zum rechten Tab, schliesse ihn und stelle ihn wieder her.",shortcut:"Command + T / Option + → / W · Command + Shift + T"},
+  {phase:"Code",title:"Code ein- und ausrücken",text:"Markiere mehrere Codezeilen, rücke sie einmal ein und danach wieder aus.",shortcut:"Tab · Shift + Tab"},
+  {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopiere Text, finde ein Wort, wechsle die App, öffne einen Browser-Tab und stelle einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
+];
+
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
 
 export default function Home() {
   const [guide,setGuide]=useState<GuideKey>("eduzh");
@@ -83,10 +121,10 @@ export default function Home() {
   const [menu,setMenu]=useState(false);
   const [zoom,setZoom]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):(computer==="windows"?challengeWindows:challengeMac),[guide,computer]);
+  const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer]);
   const step=steps[current]||steps[0];
   const image=guide==="eduzh"&&phone==="android"?step.altImage:step.image;
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`;
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`;
   const choose=(key:GuideKey)=>{setGuide(key);setCurrent(0);setMenu(false);setZoom(false);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
@@ -120,14 +158,14 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{current===steps.length-1?"✓":"⌘"}</b><p>KG · HMS</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
         <div className="step-label"><span>Schritt {String(current+1).padStart(2,"0")}</span><i/>{step.phase}</div>
         <h2>{step.title}</h2><p>{step.text}</p>
         {guide==="eduzh"&&current===1&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
-        {(guide==="wlan"||guide==="challenge")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
+        {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinde unbedingt dein eigenes Beispiel und verwende es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
