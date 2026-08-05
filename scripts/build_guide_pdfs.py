@@ -7,10 +7,9 @@ from pathlib import Path
 from PIL import Image
 from reportlab.lib.colors import HexColor, white
 from reportlab.lib.enums import TA_LEFT
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Paragraph
 from reportlab.pdfgen import canvas
 
@@ -18,12 +17,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "app" / "page.tsx"
 OUTPUT = ROOT / "output" / "pdf"
 PUBLIC = ROOT / "public" / "pdfs"
-PAPER = HexColor("#fffef8")
+PAPER = white
 INK = HexColor("#132624")
 TEAL = HexColor("#217c6f")
 GREEN = HexColor("#a2b444")
 BLUE = HexColor("#00adef")
 PALE = HexColor("#e0e7bc")
+LINE = HexColor("#d9dfd1")
 
 def parse_steps(name):
     text = SOURCE.read_text(encoding="utf-8")
@@ -37,66 +37,99 @@ def parse_steps(name):
 def safe(text):
     return html.escape(text).replace("–", "-").replace("—", "-")
 
-BODY = ParagraphStyle("body", fontName="Helvetica", fontSize=12, leading=18, textColor=INK, alignment=TA_LEFT)
-TIP = ParagraphStyle("tip", fontName="Helvetica", fontSize=9.5, leading=14, textColor=INK)
+BODY = ParagraphStyle("body", fontName="Helvetica", fontSize=8.6, leading=11.2, textColor=INK, alignment=TA_LEFT)
+TIP = ParagraphStyle("tip", fontName="Helvetica", fontSize=7.2, leading=9.2, textColor=INK)
+TITLE = ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=13, leading=14.5, textColor=INK)
 
 def draw_footer(c, page_no, total):
-    w, _ = landscape(A4)
-    c.setFillColor(GREEN); c.rect(0, 0, w, 12*mm, fill=1, stroke=0)
-    c.setFillColor(white); c.setFont("Helvetica-Bold", 7.5)
-    c.drawString(14*mm, 4.5*mm, "© 2026 Cyril Blum · Kantonsschule Stadelhofen · Filiale Dübendorf")
-    c.drawRightString(w-14*mm, 4.5*mm, f"{page_no} / {total}")
+    w, _ = A4
+    c.setStrokeColor(LINE); c.setLineWidth(.5); c.line(12*mm, 11*mm, w-12*mm, 11*mm)
+    c.setFillColor(TEAL); c.setFont("Helvetica", 6.5)
+    c.drawString(12*mm, 6.5*mm, "© 2026 Cyril Blum · Kantonsschule Stadelhofen · Filiale Dübendorf")
+    c.drawRightString(w-12*mm, 6.5*mm, f"Seite {page_no} / {total}")
 
 def draw_image(c, path, x, y, max_w, max_h):
     with Image.open(path) as im:
         iw, ih = im.size
     scale = min(max_w/iw, max_h/ih)
     dw, dh = iw*scale, ih*scale
-    c.setFillColor(PALE); c.rect(x+3*mm, y-3*mm, dw, dh, fill=1, stroke=0)
-    c.drawImage(str(path), x, y, width=dw, height=dh, preserveAspectRatio=True, mask="auto")
+    ix = x + (max_w-dw)/2
+    iy = y + (max_h-dh)/2
+    c.setFillColor(HexColor("#f3f6ea")); c.roundRect(ix+1.5*mm, iy-1.5*mm, dw, dh, 1.5*mm, fill=1, stroke=0)
+    c.drawImage(str(path), ix, iy, width=dw, height=dh, preserveAspectRatio=True, mask="auto")
+
+def draw_step(c, step, idx, image_choice, platform, x, y, width, height):
+    top = y + height
+    c.setFillColor(GREEN); c.roundRect(x, top-8*mm, 24*mm, 6.5*mm, 1.2*mm, fill=1, stroke=0)
+    c.setFillColor(white); c.setFont("Helvetica-Bold", 6.5)
+    c.drawCentredString(x+12*mm, top-5.8*mm, f"SCHRITT {idx:02d}")
+    c.setFillColor(TEAL); c.setFont("Helvetica-Bold", 6.5)
+    c.drawString(x+28*mm, top-5.8*mm, step.get("phase", "").upper())
+
+    image_x, image_y = x, y+5*mm
+    image_w, image_h = 57*mm, height-17*mm
+    image_rel = step.get(image_choice) or step.get("image")
+    if image_rel:
+        draw_image(c, ROOT / "public" / image_rel.lstrip("/"), image_x, image_y, image_w, image_h)
+    else:
+        box_h = min(38*mm, image_h)
+        box_y = y + height - 17*mm - box_h
+        c.setFillColor(HexColor("#eef4e5")); c.roundRect(image_x, box_y, image_w, box_h, 2*mm, fill=1, stroke=0)
+        c.setFillColor(TEAL); c.setFont("Helvetica-Bold", 13)
+        shortcut = step.get("shortcut") or ("MAC" if platform == "macOS" else "WIN")
+        shortcut_p = Paragraph(safe(shortcut), ParagraphStyle("shortcut", fontName="Helvetica-Bold", fontSize=13, leading=15, textColor=TEAL, alignment=TA_LEFT))
+        _, shortcut_h = shortcut_p.wrap(image_w-8*mm, box_h-8*mm)
+        shortcut_p.drawOn(c, image_x+4*mm, box_y+box_h-5*mm-shortcut_h)
+
+    text_x = x + 64*mm
+    text_w = width - 64*mm
+    cursor = top - 11*mm
+    title_p = Paragraph(safe(step["title"]), TITLE)
+    _, title_h = title_p.wrap(text_w, 24*mm)
+    title_p.drawOn(c, text_x, cursor-title_h)
+    cursor -= title_h + 3*mm
+
+    body_p = Paragraph(safe(step["text"]), BODY)
+    _, body_h = body_p.wrap(text_w, 44*mm)
+    body_p.drawOn(c, text_x, cursor-body_h)
+    cursor -= body_h
+
+    if step.get("tip"):
+        tip_p = Paragraph("<b>GUT ZU WISSEN</b><br/>" + safe(step["tip"]), TIP)
+        _, tip_h = tip_p.wrap(text_w-7*mm, 45*mm)
+        box_h = tip_h + 5*mm
+        cursor -= 3*mm
+        c.setFillColor(HexColor("#f1f5e3")); c.roundRect(text_x, cursor-box_h, text_w, box_h, 1.5*mm, fill=1, stroke=0)
+        c.setFillColor(BLUE); c.rect(text_x, cursor-box_h, 2*mm, box_h, fill=1, stroke=0)
+        tip_p.drawOn(c, text_x+5*mm, cursor-box_h+2.5*mm)
+        cursor -= box_h
+
+    if step.get("phase") == "Kennwort":
+        cursor -= 3*mm
+        box_h = 18*mm
+        c.setFillColor(HexColor("#f1f5e3")); c.roundRect(text_x, cursor-box_h, text_w, box_h, 1.5*mm, fill=1, stroke=0)
+        c.setFillColor(TEAL); c.setFont("Helvetica-Bold", 6.5); c.drawString(text_x+4*mm, cursor-5*mm, "BEISPIEL - BITTE EIN EIGENES KENNWORT VERWENDEN")
+        c.setFont("Courier-Bold", 9.5); c.drawString(text_x+4*mm, cursor-11.5*mm, "Wolke!Kanu7Tisch-Lama")
 
 def make_pdf(filename, title, steps, image_choice="image", platform=""):
     OUTPUT.mkdir(parents=True, exist_ok=True); PUBLIC.mkdir(parents=True, exist_ok=True)
     out = OUTPUT / filename
-    w, h = landscape(A4)
+    w, h = A4
     c = canvas.Canvas(str(out), pagesize=(w,h), pageCompression=1)
-    total = len(steps)
-    for idx, step in enumerate(steps, 1):
+    total_pages = (len(steps)+1)//2
+    for page_idx in range(total_pages):
         c.setFillColor(PAPER); c.rect(0,0,w,h,fill=1,stroke=0)
-        c.setFillColor(TEAL); c.rect(0,h-22*mm,w,22*mm,fill=1,stroke=0)
-        c.setFillColor(white); c.setFont("Helvetica-Bold",10); c.drawString(14*mm,h-9*mm,title)
-        c.setFont("Helvetica",8); c.drawRightString(w-14*mm,h-9*mm,platform)
-        c.setFillColor(GREEN); c.rect(14*mm,h-31*mm,27*mm,8*mm,fill=1,stroke=0)
-        c.setFillColor(white); c.setFont("Helvetica-Bold",8); c.drawCentredString(27.5*mm,h-28.2*mm,f"SCHRITT {idx:02d}")
-        c.setFillColor(BLUE); c.rect(44*mm,h-27.8*mm,10*mm,1.6*mm,fill=1,stroke=0)
-        c.setFillColor(TEAL); c.setFont("Helvetica-Bold",8); c.drawString(58*mm,h-28.5*mm,step.get("phase","").upper())
-        left_x, left_y, left_w, left_h = 14*mm, 23*mm, 116*mm, 142*mm
-        image_rel = step.get(image_choice) or step.get("image")
-        if image_rel:
-            draw_image(c, ROOT / "public" / image_rel.lstrip("/"), left_x, left_y, left_w, left_h)
-        else:
-            c.setFillColor(TEAL); c.roundRect(left_x,left_y,left_w,left_h,4*mm,fill=1,stroke=0)
-            shortcut = safe(step.get("shortcut") or ("MAC" if platform=="macOS" else "WIN"))
-            shortcut_p = Paragraph(shortcut, ParagraphStyle("shortcut",fontName="Helvetica-Bold",fontSize=25,leading=30,textColor=PALE))
-            _, sh = shortcut_p.wrap(92*mm,75*mm); shortcut_p.drawOn(c,left_x+12*mm,left_y+72*mm-sh/2)
-            c.setFillColor(white); c.setFont("Helvetica-Bold",10)
-            card_label = "VORAUSSETZUNG · KG / HMS" if platform == "BYOD" else ("STECKBRIEF · KURZPROFIL" if title.startswith("Steckbrief") else ("SHORTCUT TRAINING" if title.startswith("Shortcut") else "WINDOW MANAGEMENT · KG / HMS"))
-            c.drawString(left_x+12*mm,left_y+16*mm,card_label)
-        rx = 143*mm
-        title_p = Paragraph(safe(step["title"]), ParagraphStyle("title",fontName="Helvetica-Bold",fontSize=25,leading=27,textColor=INK))
-        _, th = title_p.wrap(136*mm,55*mm); title_p.drawOn(c,rx,h-46*mm-th)
-        body_p = Paragraph(safe(step["text"]), BODY); _, bh = body_p.wrap(136*mm,75*mm); body_p.drawOn(c,rx,h-57*mm-th-bh)
-        if step.get("tip"):
-            box_y = h-72*mm-th-bh
-            c.setFillColor(PALE); c.rect(rx,box_y-25*mm,136*mm,25*mm,fill=1,stroke=0)
-            c.setFillColor(BLUE); c.rect(rx,box_y-25*mm,3*mm,25*mm,fill=1,stroke=0)
-            tip = Paragraph("<b>GUT ZU WISSEN</b><br/>"+safe(step["tip"]),TIP); tip.wrapOn(c,126*mm,20*mm); tip.drawOn(c,rx+7*mm,box_y-20*mm)
-        if step.get("phase")=="Kennwort":
-            py=42*mm; c.setFillColor(PALE); c.roundRect(rx,py,136*mm,32*mm,3*mm,fill=1,stroke=0)
-            c.setFillColor(TEAL); c.setFont("Helvetica-Bold",9); c.drawString(rx+7*mm,py+22*mm,"KONKRETES BEISPIEL")
-            c.setFont("Courier-Bold",14); c.drawString(rx+7*mm,py+12*mm,"Wolke!Kanu7Tisch-Lama")
-            c.setFont("Helvetica",7.5); c.drawString(rx+7*mm,py+5*mm,"Bitte erfinden Sie ein eigenes Kennwort und verwenden Sie es nur für dieses Konto.")
-        draw_footer(c,idx,total); c.showPage()
+        c.setFillColor(TEAL); c.rect(0,h-18*mm,w,18*mm,fill=1,stroke=0)
+        c.setFillColor(white); c.setFont("Helvetica-Bold",10); c.drawString(12*mm,h-11*mm,title)
+        c.setFont("Helvetica",7); c.drawRightString(w-12*mm,h-11*mm,platform)
+
+        row_x, row_w, row_h = 12*mm, w-24*mm, 124*mm
+        first = page_idx*2
+        draw_step(c, steps[first], first+1, image_choice, platform, row_x, 146*mm, row_w, row_h)
+        if first+1 < len(steps):
+            c.setStrokeColor(LINE); c.setLineWidth(.7); c.line(row_x, 142*mm, row_x+row_w, 142*mm)
+            draw_step(c, steps[first+1], first+2, image_choice, platform, row_x, 16*mm, row_w, row_h)
+        draw_footer(c,page_idx+1,total_pages); c.showPage()
     c.save()
     shutil.copy2(out, PUBLIC / filename)
     return out
