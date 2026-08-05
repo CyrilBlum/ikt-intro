@@ -164,10 +164,9 @@ export default function Home() {
       <div className="intro-shade"/>
       <div className="intro-copy">
         <img src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/>
-        <p className="intro-kicker">IKT-EINFÜHRUNG</p>
-        <h1>Gut vorbereitet<br/>in den Schulalltag.</h1>
-        <p>Richten Sie Ihr EduZH-Konto ein, verbinden Sie Ihr Gerät mit dem WLAN und lernen Sie die wichtigsten digitalen Werkzeuge kennen.</p>
-        <button onClick={()=>choose("eduzh")}>Einführung starten <span>→</span></button>
+        <h1>IKT-Einführung</h1>
+        <p>Wählen Sie eine Anleitung im Menü oder beginnen Sie mit dem EduZH-Erstlogin.</p>
+        <button onClick={()=>choose("eduzh")}>Mit EduZH beginnen <span>→</span></button>
       </div>
       <aside className="wifi-card">
         <img src="/wifi.svg" alt="QR-Code für das WLAN"/>
