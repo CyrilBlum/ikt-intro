@@ -158,7 +158,7 @@ export default function Home() {
       <div className="dots">{steps.map((s,i)=><button key={`${s.title}-${i}`} onClick={()=>go(i)} className={i===current?"active":i<current?"done":""} aria-label={`Schritt ${i+1}: ${s.title}`}><span>{i+1}</span></button>)}</div>
     </nav>
 
-    <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
+    <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
         {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
@@ -172,7 +172,7 @@ export default function Home() {
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinde unbedingt dein eigenes Beispiel und verwende es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
-        <a className="pdf-download" href={pdfHref} download>↓ Aktuelle Anleitung als PDF</a>
+        <a className="pdf-download" href={pdfHref} target="_blank" rel="noreferrer">↗ Aktuelle Anleitung als PDF öffnen</a>
         <p className="keyboard"><span className="desktop-hint">Mit den Pfeiltasten navigieren.</span><span className="mobile-hint">Nach links oder rechts wischen.</span></p>
       </article>
     </section>
