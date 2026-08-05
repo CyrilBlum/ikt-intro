@@ -122,6 +122,7 @@ export default function Home() {
   const [computer,setComputer]=useState<"windows"|"mac">("windows");
   const [menu,setMenu]=useState(false);
   const [zoom,setZoom]=useState(false);
+  const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const steps=useMemo(()=>guide==="eduzh"?eduzh:guide==="apps"?apps:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer]);
@@ -132,7 +133,7 @@ export default function Home() {
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
   useEffect(()=>{const timer=window.setTimeout(()=>setHeaderHidden(true),3600);return()=>window.clearTimeout(timer)},[]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,steps.length]);
+  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setQrOpen(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,steps.length]);
   const finishSwipe=(event:React.PointerEvent)=>{
     if(!swipeStart.current)return;
     const dx=event.clientX-swipeStart.current.x,dy=event.clientY-swipeStart.current.y;
@@ -170,7 +171,7 @@ export default function Home() {
       </div>
       <aside className="wifi-card">
         <img src="/wifi.svg" alt="QR-Code für das WLAN"/>
-        <div><strong>Kein mobiles Internet?</strong><p>Scannen Sie diesen QR-Code, um sich zuerst mit dem bereitgestellten WLAN zu verbinden.</p></div>
+        <div><strong>Kein mobiles Internet?</strong><p>Scannen Sie diesen QR-Code, um sich zuerst mit dem bereitgestellten WLAN zu verbinden.</p><button onClick={()=>setQrOpen(true)}>Beide QR-Codes gross anzeigen</button></div>
       </aside>
       <p className="intro-menu-hint">Alle Anleitungen finden Sie über das Menü oben links.</p>
     </section>:<>
@@ -202,5 +203,12 @@ export default function Home() {
     <img className="bottom-decoration" src="/glatt-linie-footer.png" alt="" aria-hidden="true"/>
     <footer><strong>© 2026 Cyril Blum</strong><span>Kantonsschule Stadelhofen · Filiale Dübendorf</span></footer>
     {zoom&&image&&<div className="lightbox" role="dialog" aria-modal="true" onClick={()=>setZoom(false)}><button aria-label="Schliessen">×</button><img src={image} alt=""/></div>}
+    {qrOpen&&<div className="qr-lightbox" role="dialog" aria-modal="true" aria-label="QR-Codes für WLAN und IKT-Webseite" onClick={()=>setQrOpen(false)}>
+      <button className="qr-close" aria-label="QR-Codes schliessen">×</button>
+      <div className="qr-stage" onClick={e=>e.stopPropagation()}>
+        <article><span>01</span><h2>WLAN verbinden</h2><img src="/wifi.svg" alt="QR-Code für das bereitgestellte WLAN"/><p>Für Schülerinnen und Schüler ohne mobile Daten.</p></article>
+        <article><span>02</span><h2>Anleitung öffnen</h2><img src="/ikt-in-form-atik-ch.svg" alt="QR-Code für ikt.in-form-atik.ch"/><p>Öffnet <strong>ikt.in-form-atik.ch</strong> auf dem Smartphone.</p></article>
+      </div>
+    </div>}
   </main>;
 }
