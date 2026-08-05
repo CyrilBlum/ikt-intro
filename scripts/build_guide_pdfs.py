@@ -22,7 +22,7 @@ PAPER = HexColor("#fffef8")
 INK = HexColor("#132624")
 TEAL = HexColor("#217c6f")
 GREEN = HexColor("#a2b444")
-BLUE = HexColor("#009ee0")
+BLUE = HexColor("#00adef")
 PALE = HexColor("#e0e7bc")
 
 def parse_steps(name):
