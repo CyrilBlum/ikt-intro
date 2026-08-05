@@ -223,8 +223,8 @@ export default function Home() {
     {qrOpen&&<div className="qr-lightbox" role="dialog" aria-modal="true" aria-label="QR-Codes für WLAN und IKT-Webseite" onClick={()=>setQrOpen(false)}>
       <button className="qr-close" aria-label="QR-Codes schliessen">×</button>
       <div className="qr-stage" onClick={e=>e.stopPropagation()}>
-        <article><span>01</span><h2>WLAN verbinden</h2><img src="/wifi.svg" alt="QR-Code für das bereitgestellte WLAN"/><p>Für Schülerinnen und Schüler ohne mobile Daten.</p></article>
-        <article><span>02</span><h2>Anleitung öffnen</h2><img src="/ikt-in-form-atik-ch.svg" alt="QR-Code für ikt.in-form-atik.ch"/><p>Öffnet <strong>ikt.in-form-atik.ch</strong> auf dem Smartphone.</p></article>
+        <article><span>01</span><h2>WLAN verbinden</h2><img src="/wifi.svg" alt="QR-Code für das bereitgestellte WLAN"/><div className="qr-details"><p><strong>SSID:</strong> <code>KTZH-Schulstart</code></p><p><strong>Passwort (PSK):</strong> <code>Schul$t@rt_2026!%</code></p></div></article>
+        <article><span>02</span><h2>Anleitung öffnen</h2><img src="/ikt-in-form-atik-ch.svg" alt="QR-Code für ikt.in-form-atik.ch"/><div className="qr-details"><p><strong>URL:</strong></p><p><a href="https://ikt.in-form-atik.ch/">https://ikt.in-form-atik.ch</a></p></div></article>
       </div>
     </div>}
   </main>;
