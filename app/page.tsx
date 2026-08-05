@@ -86,7 +86,7 @@ const challengeMac: Step[] = [
 ];
 
 const shortcutsWindows: Step[] = [
-  {phase:"Navigation",title:"Wortweise durch Text springen",text:"Öffnen Sie ein Textdokument. Bewegen Sie den Cursor fünf Wörter nach rechts und danach zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Ctrl + ← / →"},
+  {phase:"Vorbereitung",title:"Geeigneten Arbeitsort öffnen",text:"Öffnen Sie ein Dokument, in dem Sie schreiben und markieren dürfen. Sie können beispielsweise das Word-Dokument aus der Steckbrief-Challenge verwenden. Bewegen Sie den Cursor anschliessend fünf Wörter nach rechts und zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Ctrl + ← / →",tip:"Speichern Sie das Dokument zuerst unter einem eigenen Dateinamen, damit Ihre Vorlage unverändert bleibt."},
   {phase:"Markieren",title:"Wörter präzise markieren",text:"Markieren Sie die nächsten drei Wörter ab der Cursorposition. Kopieren Sie noch nichts.",shortcut:"Ctrl + Shift + →"},
   {phase:"Auswahl",title:"Alles auswählen",text:"Markieren Sie den gesamten Text mit einem einzigen Kürzel und heben Sie die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Ctrl + A"},
   {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopieren Sie einen Satz, fügen Sie ihn an einer neuen Stelle ein und verschieben Sie einen zweiten Satz per Ausschneiden.",shortcut:"Ctrl + C / X / V"},
@@ -99,7 +99,7 @@ const shortcutsWindows: Step[] = [
   {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopieren Sie Text, finden Sie ein Wort, wechseln Sie die App, öffnen Sie einen Browser-Tab und stellen Sie einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
 ];
 const shortcutsMac: Step[] = [
-  {phase:"Navigation",title:"Wortweise durch Text springen",text:"Öffnen Sie ein Textdokument. Bewegen Sie den Cursor fünf Wörter nach rechts und danach zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Option + ← / →"},
+  {phase:"Vorbereitung",title:"Geeigneten Arbeitsort öffnen",text:"Öffnen Sie ein Dokument, in dem Sie schreiben und markieren dürfen. Sie können beispielsweise das Word-Dokument aus der Steckbrief-Challenge verwenden. Bewegen Sie den Cursor anschliessend fünf Wörter nach rechts und zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Option + ← / →",tip:"Speichern Sie das Dokument zuerst unter einem eigenen Dateinamen, damit Ihre Vorlage unverändert bleibt."},
   {phase:"Markieren",title:"Wörter präzise markieren",text:"Markieren Sie die nächsten drei Wörter ab der Cursorposition. Kopieren Sie noch nichts.",shortcut:"Option + Shift + →"},
   {phase:"Auswahl",title:"Alles auswählen",text:"Markieren Sie den gesamten Text mit einem einzigen Kürzel und heben Sie die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Command + A"},
   {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopieren Sie einen Satz und fügen Sie ihn neu ein. Verschieben Sie danach eine Datei mit Kopieren und der Einfügen-Variante zum Bewegen.",shortcut:"Command + C / V · Option + Command + V"},
@@ -124,8 +124,8 @@ const profile: Step[] = [
   {phase:"Bonus",title:"Bonus für schnelle Profis",text:"Fügen Sie ein passendes Symbol, Emoji oder kleines Bild ein, nutzen Sie passende Farben und schreiben Sie zu mindestens einem Punkt einen kurzen Satz statt nur eines Wortes. Wenn Sie fertig sind, helfen Sie einer Person in Ihrer Nähe.",shortcut:"+"},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",profile:"Steckbrief-Challenge"};
-const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",wlan:"/wlan",apps:"/microsoft-365",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",profile:"/challenges/steckbrief"};
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
+const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",wlan:"/wlan",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts"};
 const pathGuides: Record<string,GuideKey> = Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])) as Record<string,GuideKey>;
 
 export default function Home() {
@@ -207,6 +207,7 @@ export default function Home() {
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
         {guide==="profile"&&current===3&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Vorlage herunterladen ↓</a>}
+        {guide==="shortcuts"&&current===steps.length-1&&<a className="further-tasks" href="/downloads/shortcut-uebersicht-programmieren.pdf" target="_blank" rel="noreferrer">Weitere Shortcut-Aufgaben und Übersicht als PDF öffnen ↗</a>}
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinden Sie unbedingt Ihr eigenes Beispiel und verwenden Sie es nur für dieses Konto.</p></aside>}
         {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/" target="_blank" rel="noreferrer">Jetzt auf Moodle anmelden und Aufgaben lösen ↗</a>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
