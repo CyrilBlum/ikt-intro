@@ -13,18 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EduZH-Erstlogin | IKT-Einführung",
-  description: "EduZH-Konto mit iPhone oder Android einrichten – ohne Laptop.",
+  title: "IKT-Einführung | KST FDU",
+  description: "Interaktive Anleitungen für EduZH, WLAN, Microsoft 365 und BYOD-Grundlagen.",
   openGraph: {
-    title: "EduZH-Erstlogin",
-    description: "iPhone oder Android",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "EduZH-Start – iPhone oder Android" }],
+    title: "IKT-Einführung der KST FDU",
+    description: "EduZH, WLAN, Microsoft 365 und BYOD-Challenges",
+    images: [{ url: "/og-ikt-v2.png", width: 1200, height: 630, alt: "IKT-Einführung – EduZH, WLAN, Microsoft 365 und BYOD" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "EduZH-Erstlogin",
-    description: "iPhone oder Android",
-    images: ["/og.png"],
+    title: "IKT-Einführung der KST FDU",
+    description: "EduZH, WLAN, Microsoft 365 und BYOD-Challenges",
+    images: ["/og-ikt-v2.png"],
   },
   icons: {
     icon: "/favicon.svg",
