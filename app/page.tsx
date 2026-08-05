@@ -32,6 +32,7 @@ const wlanWindows: Step[] = [
   {image:"/screenshots/wlan/windows-03.jpg",phase:"Windows",title:"Automatisch verbinden",text:"Aktivieren Sie «Automatisch verbinden» und klicken Sie auf «Verbinden»."},
   {image:"/screenshots/wlan/windows-04.jpg",phase:"Windows",title:"EduZH-Login eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch und Ihr persönliches Kennwort ein. Klicken Sie auf «OK»."},
   {image:"/screenshots/wlan/windows-05.jpg",phase:"Windows",title:"Verbindung bestätigen",text:"Bestätigen Sie mit «Verbinden». Ihr Gerät ist jetzt mit KTZH-S verbunden."},
+  {phase:"Smartphone",title:"KTZH-S auch auf dem Smartphone einrichten",text:"Verbinden Sie nun auch Ihr iPhone oder Android-Smartphone mit «KTZH-S». Verwenden Sie dieselbe EduZH-Adresse @stud.edu.zh.ch und dasselbe persönliche Kennwort wie am Computer. Sobald KTZH-S funktioniert, entfernen Sie das temporäre WLAN von Ihrem Smartphone.",shortcut:"KTZH-S",tip:"Öffnen Sie dazu die WLAN-Einstellungen und wählen Sie beim temporären Netzwerk «Dieses Netzwerk ignorieren» auf dem iPhone beziehungsweise «Netzwerk vergessen» auf Android."},
 ];
 const wlanMac: Step[] = [
   {image:"/screenshots/wlan/macos-01.jpg",phase:"macOS",title:"WLAN-Menü öffnen",text:"Klicken Sie oben in der Menüleiste auf das WLAN-Symbol."},
@@ -39,6 +40,7 @@ const wlanMac: Step[] = [
   {image:"/screenshots/wlan/macos-03.jpg",phase:"macOS",title:"EduZH-Login eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch und Ihr persönliches Kennwort ein. Klicken Sie auf «OK»."},
   {image:"/screenshots/wlan/macos-04.jpg",phase:"macOS",title:"Zertifikat bestätigen",text:"macOS zeigt das Zertifikat des Netzwerks. Klicken Sie auf «Fortfahren» und bestätigen Sie bei Bedarf mit Ihrem Mac-Kennwort."},
   {image:"/screenshots/wlan/macos-05.jpg",phase:"macOS",title:"WLAN ist verbunden",text:"Ihr Mac ist jetzt mit KTZH-S verbunden."},
+  {phase:"Smartphone",title:"KTZH-S auch auf dem Smartphone einrichten",text:"Verbinden Sie nun auch Ihr iPhone oder Android-Smartphone mit «KTZH-S». Verwenden Sie dieselbe EduZH-Adresse @stud.edu.zh.ch und dasselbe persönliche Kennwort wie am Computer. Sobald KTZH-S funktioniert, entfernen Sie das temporäre WLAN von Ihrem Smartphone.",shortcut:"KTZH-S",tip:"Öffnen Sie dazu die WLAN-Einstellungen und wählen Sie beim temporären Netzwerk «Dieses Netzwerk ignorieren» auf dem iPhone beziehungsweise «Netzwerk vergessen» auf Android."},
 ];
 
 const apps: Step[] = [
@@ -196,14 +198,14 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="wlan"?"iPHONE / ANDROID":guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="wlan"?"WLAN · SMARTPHONE":guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
         <div className="step-label"><span>Schritt {String(current+1).padStart(2,"0")}</span><i/>{step.phase}</div>
         <h2>{step.title}</h2><p>{step.text}</p>
         {guide==="eduzh"&&current===1&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
-        {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
+        {((guide==="wlan"&&step.phase!=="Smartphone")||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
         {guide==="profile"&&current===0&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Gestaltungsvorlage herunterladen ↓</a>}
