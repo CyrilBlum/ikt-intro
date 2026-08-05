@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 
 const steps = [
+  { image: "appstore-01-suchen.png", phase: "Vorbereiten", title: "Authenticator im App Store suchen", text: "Öffne auf deinem iPhone den App Store. Tippe unten auf «Suchen» und suche nach «Microsoft Authenticator». Du brauchst für die ganze Einrichtung nur dein iPhone – keinen Computer." },
+  { image: "appstore-02-laden.jpg", phase: "Vorbereiten", title: "Microsoft Authenticator laden", text: "Wähle die App «Microsoft Authenticator» von Microsoft aus und tippe auf «Laden». Warte, bis die Installation abgeschlossen ist, und öffne die App." },
+  { image: "appstore-03-annehmen.jpg", phase: "Vorbereiten", title: "Datenschutzbestimmungen annehmen", text: "Beim ersten Start informiert dich die App über erforderliche Diagnosedaten. Lies den Hinweis und tippe auf «Annehmen»." },
+  { image: "appstore-04-weiter.jpg", phase: "Vorbereiten", title: "Einführung fortsetzen", text: "Die freiwillige Freigabe zusätzlicher Nutzungsdaten kannst du ausgeschaltet lassen. Tippe unten auf «Weiter»." },
+  { image: "appstore-05-ueberspringen.jpg", phase: "Vorbereiten", title: "Persönliche Anmeldung überspringen", text: "Tippe oben rechts auf «Überspringen». Das EduZH-Schulkonto wird später automatisch mit der App verbunden. Lass den Authenticator installiert und kehre zu Safari zurück." },
   { image: "IMG_0677.PNG", phase: "Anmelden", title: "Mit dem EduZH-Konto anmelden", text: "Gib deine vollständige Schul-E-Mail-Adresse ein (z. B. muster.max@stud.edu.zh.ch) und tippe auf «Weiter». Verwende anschliessend das Startkennwort, das du von der Schule erhalten hast.", tip: "Achte auf die Endung @stud.edu.zh.ch." },
   { image: "IMG_0678.PNG", phase: "Authenticator", title: "Microsoft Authenticator installieren", text: "Installiere die kostenlose App «Microsoft Authenticator» auf deinem Smartphone. Kehre danach zu dieser Seite im Browser zurück und tippe auf «Weiter»." },
   { image: "IMG_0679.PNG", phase: "Authenticator", title: "Konto mit der App koppeln", text: "Tippe auf den blauen Link zum Koppeln des Kontos. Dein Smartphone öffnet den Authenticator automatisch und richtet das Schulkonto ein." },
@@ -41,16 +46,16 @@ export default function Home() {
   return (
     <main>
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="Zum Anfang">edu<span>ZH</span></a>
-        <div className="top-title"><strong>IKT-Start</strong><span>Erstlogin auf dem iPhone</span></div>
-        <span className="account">@stud.edu.zh.ch</span>
+        <a className="brand" href="#top" aria-label="Zum Anfang"><span className="triangle" />FDU</a>
+        <div className="top-title"><strong>Kantonsschule Stadelhofen</strong><span>Filiale Dübendorf</span></div>
+        <span className="account">IKT-Einführung</span>
       </header>
 
       <section className="hero" id="top">
-        <div className="eyebrow"><span /> In ca. 10 Minuten startklar</div>
-        <h1>Dein EduZH-Konto<br /><em>richtig einrichten.</em></h1>
-        <p>Folge den 13 Schritten auf deinem iPhone. Nach jedem Screenshot siehst du genau, was als Nächstes zu tun ist.</p>
-        <div className="prep"><strong>Das brauchst du</strong><span>iPhone</span><span>Startkennwort</span><span>Mobilnummer</span></div>
+        <div className="eyebrow"><span /> Nur mit deinem iPhone</div>
+        <h1>Hallo! Bereit für<br /><em>dein EduZH-Konto?</em></h1>
+        <p>Kein Laptop nötig. Wir installieren zuerst den Authenticator und richten danach dein Schulkonto gemeinsam auf dem iPhone ein.</p>
+        <div className="prep"><strong>Halte bereit:</strong><span>iPhone</span><span>Startkennwort</span><span>Mobilnummer</span></div>
       </section>
 
       <nav className="progress" aria-label="Fortschritt">
