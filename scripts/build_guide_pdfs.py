@@ -94,7 +94,7 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
             py=42*mm; c.setFillColor(PALE); c.roundRect(rx,py,136*mm,32*mm,3*mm,fill=1,stroke=0)
             c.setFillColor(TEAL); c.setFont("Helvetica-Bold",9); c.drawString(rx+7*mm,py+22*mm,"KONKRETES BEISPIEL")
             c.setFont("Courier-Bold",14); c.drawString(rx+7*mm,py+12*mm,"Wolke!Kanu7Tisch-Lama")
-            c.setFont("Helvetica",7.5); c.drawString(rx+7*mm,py+5*mm,"Bitte ein eigenes Kennwort erfinden und nur für dieses Konto verwenden.")
+            c.setFont("Helvetica",7.5); c.drawString(rx+7*mm,py+5*mm,"Bitte erfinden Sie ein eigenes Kennwort und verwenden Sie es nur für dieses Konto.")
         draw_footer(c,idx,total); c.showPage()
     c.save()
     shutil.copy2(out, PUBLIC / filename)
