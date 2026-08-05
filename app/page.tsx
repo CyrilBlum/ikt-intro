@@ -173,6 +173,11 @@ export default function Home() {
         return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>0{i+1}</span><b>{isChallenge&&<em>Challenge</em>}{guideNames[key]}</b></button>
       })}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
+      <section className="drawer-about" aria-labelledby="about-title">
+        <small id="about-title">ÜBER DIESE SEITE</small>
+        <p>Erstellt von <strong>Cyril Blum</strong></p>
+        <div><a href="https://cblum.ch/" target="_blank" rel="noreferrer">cblum.ch ↗</a><a href="https://github.com/CyrilBlum/ikt-intro" target="_blank" rel="noreferrer">GitHub-Repository ↗</a></div>
+      </section>
     </aside>
 
     {intro?<section className="intro" id="top">
