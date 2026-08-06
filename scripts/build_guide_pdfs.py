@@ -141,8 +141,8 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
 
 def main():
     made=[]
-    made.append(make_pdf("eduzh-iphone.pdf","EduZH-Erstlogin",parse_steps("eduzh"),"image","iPhone"))
-    made.append(make_pdf("eduzh-android.pdf","EduZH-Erstlogin",parse_steps("eduzh"),"altImage","Android"))
+    made.append(make_pdf("eduzh-iphone.pdf","EduZH-Erstlogin",parse_steps("eduzhIphone"),"image","iPhone"))
+    made.append(make_pdf("eduzh-android.pdf","EduZH-Erstlogin",parse_steps("eduzhAndroid"),"image","Android"))
     made.append(make_pdf("wlan-windows.pdf","WLAN mit KTZH-S verbinden",parse_steps("wlanWindows"),platform="Windows"))
     made.append(make_pdf("wlan-macos.pdf","WLAN mit KTZH-S verbinden",parse_steps("wlanMac"),platform="macOS"))
     made.append(make_pdf("microsoft-365.pdf","Teams, Outlook & OneDrive",parse_steps("apps"),platform="BYOD"))
