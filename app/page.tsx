@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; existingImage?: string; existingImage2?: string; existingText?: string };
-type GuideKey = "eduzh" | "wlan" | "apps" | "challenge" | "shortcuts" | "profile";
+type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; flow?: string[]; in2Mobile?: boolean; existingImage?: string; existingImage2?: string; existingText?: string };
+type GuideKey = "eduzh" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile";
 
 const eduzhIphone: Step[] = [
-  {image:"/screenshots/appstore-01-suchen.png",phase:"Vorbereiten",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den App Store und suchen Sie nach «Microsoft Authenticator». Für die ganze Einrichtung benötigen Sie nur Ihr iPhone – keinen Computer."},
+  {image:"/screenshots/appstore-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den App Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr iPhone – noch keinen Computer."},
   {image:"/screenshots/appstore-02-laden.jpg",phase:"Gerät wählen",title:"Welches Smartphone verwenden Sie?",text:"Wählen Sie Ihr Gerät aus. Die nächsten Screenshots passen sich automatisch an. Laden Sie danach «Microsoft Authenticator» und öffnen Sie die App."},
   {image:"/screenshots/appstore-03-annehmen.jpg",phase:"Vorbereiten",title:"Datenschutzbestimmungen annehmen",text:"Lesen Sie den Hinweis zu den erforderlichen Diagnosedaten und tippen Sie auf «Annehmen»."},
   {image:"/screenshots/appstore-04-weiter.jpg",phase:"Vorbereiten",title:"Einführung fortsetzen",text:"Die freiwillige Freigabe zusätzlicher Nutzungsdaten können Sie ausgeschaltet lassen. Tippen Sie unten auf «Weiter»."},
@@ -28,11 +28,11 @@ const eduzhIphone: Step[] = [
   {image:"/screenshots/eduzh-v2/iphone-20-setup-complete.jpg",phase:"Sicherheit",title:"Einrichtung abschliessen",text:"Prüfen Sie, ob «Telefon» und «Microsoft Authenticator» aufgeführt sind. Tippen Sie anschliessend auf «Fertig»."},
   {image:"/screenshots/eduzh-v2/iphone-21-change-password.jpg",phase:"Kennwort",title:"Persönliches Kennwort setzen",text:"Geben Sie unter «Aktuelles Kennwort» nochmals das Startkennwort ein. Legen Sie danach ein neues persönliches Kennwort fest und bestätigen Sie es.",tip:"Bewahren Sie Ihr Kennwort sicher auf und geben Sie es niemandem weiter."},
   {image:"/screenshots/eduzh/iphone-19-wlan-ktzh-s.png",phase:"WLAN",title:"KTZH-S auf dem iPhone einrichten",text:"Verbinden Sie Ihr iPhone nun mit «KTZH-S». Verwenden Sie Ihre vollständige EduZH-Adresse und Ihr persönliches Kennwort. Falls beim Verbinden eine Zertifikatsabfrage erscheint, bestätigen beziehungsweise akzeptieren Sie diese.",tip:"Prüfen Sie zuerst, ob KTZH-S funktioniert. Entfernen Sie danach das temporäre WLAN über «Dieses Netzwerk ignorieren»."},
-  {image:"/screenshots/eduzh-v2/iphone-23-account-ready.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Öffnen Sie nun den Moodle-Kurs «IKT-Einführung» und melden Sie sich mit Ihrem EduZH-Konto an.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. In der IKT-Einführung markieren Sie fortlaufend, welche Bereiche Sie bereits erledigt haben. Falls Moodle den Kurs nach der Anmeldung nicht direkt öffnet, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung»."},
+  {image:"/screenshots/eduzh-v2/iphone-23-account-ready.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Wählen Sie auf der nächsten Seite Ihren Schulweg."},
 ];
 
 const eduzhAndroid: Step[] = [
-  {image:"/screenshots/android-01-suchen.png",phase:"Vorbereiten",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den Google Play Store und suchen Sie nach «Microsoft Authenticator». Für die ganze Einrichtung benötigen Sie nur Ihr Smartphone – keinen Computer."},
+  {image:"/screenshots/android-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den Google Play Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr Smartphone – noch keinen Computer."},
   {image:"/screenshots/android-02-laden.jpg",phase:"Gerät wählen",title:"Welches Smartphone verwenden Sie?",text:"Wählen Sie Ihr Gerät aus. Die nächsten Screenshots passen sich automatisch an. Installieren Sie danach «Microsoft Authenticator» und öffnen Sie die App."},
   {image:"/screenshots/android-03-annehmen.jpg",phase:"Vorbereiten",title:"Datenschutzbestimmungen annehmen",text:"Lesen Sie den Hinweis zu den erforderlichen Diagnosedaten und tippen Sie auf «Annehmen»."},
   {image:"/screenshots/android-04-weiter.jpg",phase:"Vorbereiten",title:"Einführung fortsetzen",text:"Die freiwillige Freigabe zusätzlicher Nutzungsdaten können Sie ausgeschaltet lassen. Tippen Sie unten auf «Weiter»."},
@@ -50,7 +50,7 @@ const eduzhAndroid: Step[] = [
   {image:"/screenshots/android-16-methoden.png",phase:"Telefon",title:"Sicherheitsmethoden prüfen",text:"Kontrollieren Sie, ob «Telefon» und «Microsoft Authenticator» aufgeführt sind. Tippen Sie dann auf «Fertig»."},
   {image:"/screenshots/android-17-kennwort.png",phase:"Kennwort",title:"Persönliches Kennwort setzen",text:"Geben Sie zuerst das Startkennwort ein. Legen Sie danach ein neues persönliches Kennwort fest und bestätigen Sie es.",tip:"Bewahren Sie Ihr Kennwort sicher auf und geben Sie es niemandem weiter."},
   {image:"/screenshots/eduzh/android-19-wlan-ktzh-s.png",phase:"WLAN",title:"KTZH-S auf dem Smartphone einrichten",text:"Verbinden Sie Ihr Smartphone nun mit «KTZH-S». Verwenden Sie Ihre vollständige EduZH-Adresse und Ihr persönliches Kennwort. Falls beim Verbinden eine Zertifikatsabfrage erscheint, bestätigen beziehungsweise akzeptieren Sie diese.",tip:"Prüfen Sie zuerst, ob KTZH-S funktioniert. Entfernen Sie danach das temporäre WLAN über «Netzwerk vergessen»."},
-  {image:"/screenshots/android-18-fertig.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Öffnen Sie nun den Moodle-Kurs «IKT-Einführung» und melden Sie sich mit Ihrem EduZH-Konto an.",tip:"Falls Moodle den Kurs nach der Anmeldung nicht direkt öffnet, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung»."},
+  {image:"/screenshots/android-18-fertig.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Wählen Sie auf der nächsten Seite Ihren Schulweg."},
 ];
 
 const wlanWindows: Step[] = [
@@ -86,6 +86,54 @@ const apps: Step[] = [
   {image:"/screenshots/apps/step-050.png",phase:"OneDrive",title:"Anmeldung bestätigen",text:"Geben Sie Ihr Kennwort ein, bestätigen Sie im Authenticator und wählen Sie «Ja, alle Apps»."},
   {image:"/screenshots/apps/step-053.jpg",phase:"OneDrive",title:"OneDrive-Ordner wählen",text:"Klicken Sie auf «Weiter» und wählen Sie, welche Ordner synchronisiert werden sollen."},
   {image:"/screenshots/apps/step-061.png",phase:"OneDrive",title:"OneDrive ist bereit",text:"Die Einrichtung ist abgeschlossen. Ihre Schuldateien werden jetzt synchronisiert."},
+];
+
+const officeMobileIphone: Step[] = [
+  {image:"/screenshots/ug-mobile/office-apps-ios-android.png",phase:"Schritt 02 · UG",title:"Teams, Outlook und OneNote laden",text:"Öffnen Sie diese Anleitung jetzt am Schul-Computer. Suchen und installieren Sie auf Ihrem iPhone nacheinander Microsoft Teams, Microsoft Outlook und Microsoft OneNote."},
+  {image:"/screenshots/appstore-05-microsoft-anmelden.png",phase:"iPhone · Anmelden",title:"Mit dem EduZH-Konto anmelden",text:"Öffnen Sie jede der drei Apps mindestens einmal. Melden Sie sich mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Bestätigen Sie die Anmeldung im Microsoft Authenticator.",tip:"Falls eine App bereits mit einem privaten Konto geöffnet wird, wählen Sie «Konto hinzufügen» und danach Ihr Schulkonto."},
+  {phase:"iPhone · Prüfen",title:"Die drei Apps sind bereit",text:"Kontrollieren Sie: Teams zeigt Ihre Schulteams, Outlook Ihr EduZH-Postfach und OneNote lässt sich mit Ihrem Schulkonto öffnen.",shortcut:"✓"},
+];
+
+const officeMobileAndroid: Step[] = [
+  {image:"/screenshots/ug-mobile/office-apps-ios-android.png",phase:"Schritt 02 · UG",title:"Teams, Outlook und OneNote laden",text:"Öffnen Sie diese Anleitung jetzt am Schul-Computer. Suchen und installieren Sie auf Ihrem Android-Smartphone nacheinander Microsoft Teams, Microsoft Outlook und Microsoft OneNote."},
+  {image:"/screenshots/android-05-anmelden.jpg",phase:"Android · Anmelden",title:"Mit dem EduZH-Konto anmelden",text:"Öffnen Sie jede der drei Apps mindestens einmal. Melden Sie sich mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Bestätigen Sie die Anmeldung im Microsoft Authenticator.",tip:"Falls eine App bereits mit einem privaten Konto geöffnet wird, wählen Sie «Konto hinzufügen» und danach Ihr Schulkonto."},
+  {phase:"Android · Prüfen",title:"Die drei Apps sind bereit",text:"Kontrollieren Sie: Teams zeigt Ihre Schulteams, Outlook Ihr EduZH-Postfach und OneNote lässt sich mit Ihrem Schulkonto öffnen.",shortcut:"✓"},
+];
+
+const intranetMobile: Step[] = [
+  {phase:"UG · Intranet",title:"IN2 Mobile installieren",text:"Lesen Sie diese Anleitung am Schulcomputer. Installieren Sie anschliessend IN2 Mobile auf Ihrem Smartphone. Die App ermöglicht Ihnen, wichtige Funktionen des Intranets auch unterwegs auf dem Smartphone zu nutzen.",in2Mobile:true,tip:"Scannen Sie den passenden QR-Code für Ihr Gerät und lassen Sie die App nach der Installation auf dem Smartphone."},
+  {image:"/screenshots/kg-intranet/real/dashboard.png",phase:"UG · Intranet",title:"Das Intranet am Schulcomputer öffnen",text:"Nach der Anmeldung sehen Sie das Dashboard. Links finden Sie die wichtigsten Bereiche; rechts liegen zum Beispiel Ihr Stundenplan, Ihre Klasse und die Schulbestätigung."},
+  {image:"/screenshots/kg-intranet/real/stundenplan.png",phase:"UG · Stundenplan",title:"Stundenplan anschauen",text:"Im Bereich «Stundenplan» sehen Sie Ihre Lektionen in der Wochenansicht. Schauen Sie sich einmal an, wie Sie zwischen Tagen, Wochen und dem Semester wechseln."},
+  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"UG · Stundenplan",title:"Stundenplan abonnieren",text:"Über das RSS-Symbol bei «Termine» können Sie Ihren Stundenplan und die Schultermine in einer Kalender-App abonnieren. Sie müssen sich dabei nichts merken: Fragen Sie bei Unklarheiten Ihre Lehrperson. Sie können selbstverständlich auch einfach einen Papierkalender verwenden."},
+  {image:"/screenshots/kg-intranet/real/absenzen.png",phase:"UG · Absenzen",title:"Absenzenerfassung kennenlernen",text:"Unter «Absenzen» sehen Sie Ihre erfassten Absenzen. Hier können Sie auch Joker-Tags-Gesuche sowie Dispensationsgesuche bis 1 Tag und über 1 Tag einreichen. Schauen Sie sich den Bereich an, senden Sie aber keine Testabsenz ab."},
+  {image:"/screenshots/kg-intranet/real/notenbuechlein.png",phase:"UG · Noten",title:"Notenbüchlein anschauen",text:"Im Menü «Noten» finden Sie das Notenbüchlein. Öffnen Sie die Übersicht einmal, damit Sie später wissen, wo Ihre Noten angezeigt werden."},
+  {image:"/screenshots/kg-intranet/real/schulbestaetigung.png",phase:"UG · Dokumente",title:"Schulbestätigung finden",text:"Unter «Dokumente & Dateien» finden Sie die Schulbestätigung. Öffnen Sie das Menü einmal, damit Sie bei Bedarf rasch wissen, wo das Dokument abgelegt ist."},
+];
+
+const kgIntranet: Step[] = [
+  {phase:"KG / HMS · Intranet",title:"IN2 Mobile installieren",text:"Installieren Sie IN2 Mobile auf Ihrem Smartphone. Die App ermöglicht Ihnen, wichtige Funktionen des Intranets auch unterwegs auf dem Smartphone zu nutzen.",in2Mobile:true,tip:"Scannen Sie den passenden QR-Code für Ihr Gerät und lassen Sie die App nach der Installation auf dem Smartphone."},
+  {image:"/screenshots/kg-intranet/real/dashboard.png",phase:"KG · Intranet",title:"Das Intranet auf dem Laptop öffnen",text:"Nach der Anmeldung sehen Sie das Dashboard. Links finden Sie die wichtigsten Bereiche; rechts liegen zum Beispiel Ihr Stundenplan, Ihre Klasse und die Schulbestätigung."},
+  {image:"/screenshots/kg-intranet/real/stundenplan.png",phase:"KG · Stundenplan",title:"Stundenplan anschauen",text:"Im Bereich «Stundenplan» sehen Sie Ihre Lektionen in der Wochenansicht. Schauen Sie sich einmal an, wie Sie zwischen Tagen, Wochen und dem Semester wechseln."},
+  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"KG · Stundenplan",title:"Stundenplan abonnieren",text:"Über das RSS-Symbol bei «Termine» können Sie Ihren Stundenplan und die Schultermine in einer Kalender-App abonnieren. Sie müssen sich dabei nichts merken: Fragen Sie bei Unklarheiten Ihre Lehrperson. Sie können selbstverständlich auch einfach einen Papierkalender verwenden."},
+  {image:"/screenshots/kg-intranet/real/absenzen.png",phase:"KG · Absenzen",title:"Absenzenerfassung kennenlernen",text:"Unter «Absenzen» sehen Sie Ihre erfassten Absenzen. Hier können Sie auch Joker-Tags-Gesuche sowie Dispensationsgesuche bis 1 Tag und über 1 Tag einreichen. Schauen Sie sich den Bereich an, senden Sie aber keine Testabsenz ab."},
+  {image:"/screenshots/kg-intranet/real/notenbuechlein.png",phase:"KG · Noten",title:"Notenbüchlein anschauen",text:"Im Menü «Noten» finden Sie das Notenbüchlein. Öffnen Sie die Übersicht einmal, damit Sie später wissen, wo Ihre Noten angezeigt werden."},
+  {image:"/screenshots/kg-intranet/real/schulbestaetigung.png",phase:"KG · Dokumente",title:"Schulbestätigung finden",text:"Unter «Dokumente & Dateien» finden Sie die Schulbestätigung. Öffnen Sie das Menü einmal, damit Sie bei Bedarf rasch wissen, wo das Dokument abgelegt ist."},
+];
+
+const printer: Step[] = [
+  {image:"/screenshots/printer/qr-anmeldung.png",phase:"KG / HMS · Erstanmeldung",title:"Am Drucker per QR-Code anmelden",text:"Gehen Sie zu einem Multifunktionsdrucker und scannen Sie den QR-Code auf dem Display mit Ihrem Smartphone. Öffnen Sie den Link, melden Sie sich mit Ihrem EduZH-Konto an und bestätigen Sie bei Bedarf im Authenticator.",tip:"Falls der Drucker nach der Anmeldung noch den QR-Code zeigt, scannen Sie ihn einfach ein zweites Mal."},
+  {image:"/screenshots/printer/badge-verknuepfen.png",phase:"KG / HMS · Badge",title:"Badge einmal verknüpfen",text:"Sobald auf dem Drucker «Bereit» steht, tippen Sie oben auf «Karte verknüpfen». Halten Sie danach Ihren Badge an den Kartenleser unterhalb des Displays; künftig genügt der Badge für die Anmeldung."},
+  {image:"/screenshots/printer/pixio-uebersicht.png",phase:"KG / HMS · Druckauftrag",title:"Datei in Pixio hochladen",text:"Öffnen Sie auf Ihrem BYOD-Gerät das Pixio-Portal und melden Sie sich mit Ihrem Schulaccount an. Über das Pluszeichen erstellen Sie einen neuen Druckauftrag und wählen Ihre Datei aus.",tip:"Das Web-Portal funktioniert für BYOD-Geräte: https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?"},
+  {image:"/screenshots/printer/druckauftrag-erstellen.png",phase:"KG / HMS · Einstellungen",title:"Druckeinstellungen wählen",text:"Wählen Sie bei Bedarf Schwarz-Weiss oder Farbe, ein- oder doppelseitig und die Anzahl Kopien. Klicken Sie anschliessend auf «Erstellen»; der Auftrag landet in Ihrer persönlichen Warteschlange."},
+  {image:"/screenshots/printer/druckauftrag-abholen.png",phase:"KG / HMS · Abholen",title:"Auftrag am Drucker freigeben",text:"Melden Sie sich am gewünschten Drucker mit Ihrem Badge an. Wählen Sie den Auftrag in «Queue Print» und tippen Sie auf «Drucken» – erst dann wird das Dokument ausgegeben.",tip:"Nehmen Sie Ausdrucke sofort mit und lassen Sie keine vertraulichen Dokumente am Gerät liegen."},
+];
+
+const ugWorkflow: Step[] = [
+  {phase:"Untergymnasium · Ablauf",title:"So geht es jetzt weiter",text:"Melden Sie sich zuerst am Schul-Computer mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Öffnen Sie danach Moodle und die Aufgabenliste. Klicken Sie beim jeweiligen Auftrag auf den Link; er öffnet diese Anleitung in einem neuen Tab. Nach dem Abschluss markieren Sie die Aufgabe in Moodle als erledigt und gehen zur nächsten Aufgabe weiter.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. Falls der Kurs nach der Anmeldung nicht direkt erscheint, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung».",flow:["Am Schul-Computer mit EduZH-Adresse und persönlichem Kennwort anmelden","In Moodle anmelden und Aufgabenliste öffnen","Link im neuen Tab öffnen und Aufgabe bearbeiten","In Moodle als erledigt markieren","Nächste Aufgabe öffnen"]},
+];
+
+const kgWorkflow: Step[] = [
+  {phase:"Kurzzeitgymnasium / HMS · Ablauf",title:"So geht es jetzt weiter",text:"Melden Sie sich auf Ihrem BYOD-Gerät in Moodle an und öffnen Sie die Aufgabenliste. Klicken Sie beim jeweiligen Auftrag auf den Link; er öffnet diese Anleitung in einem neuen Tab. Nach dem Abschluss markieren Sie die Aufgabe in Moodle als erledigt und gehen zur nächsten Aufgabe weiter.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. Falls der Kurs nach der Anmeldung nicht direkt erscheint, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung».",flow:["In Moodle anmelden und Aufgabenliste öffnen","Link im neuen Tab öffnen und Aufgabe bearbeiten","In Moodle als erledigt markieren","Nächste Aufgabe öffnen"]},
 ];
 
 const challengeWindows: Step[] = [
@@ -151,9 +199,14 @@ const profile: Step[] = [
   {phase:"Bonus",title:"Bonus für schnelle Profis",text:"Fügen Sie ein passendes Symbol, Emoji oder kleines Bild ein, nutzen Sie passende Farben und schreiben Sie zu mindestens einem Punkt einen kurzen Satz statt nur eines Wortes. Wenn Sie fertig sind, helfen Sie einer Person in Ihrer Nähe.",shortcut:"+"},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",wlan:"WLAN verbinden",apps:"Teams, Outlook & OneDrive",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
-const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",wlan:"/wlan",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts"};
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge"};
+const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts"};
 const pathGuides: Record<string,GuideKey> = Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])) as Record<string,GuideKey>;
+const navigationGroups: { number: string; title: string; subtitle: string; guides: GuideKey[] }[] = [
+  {number:"2a",title:"UG",subtitle:"Schul-Computer",guides:["officeMobile","intranetMobile"]},
+  {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",guides:["wlan","apps","kgIntranet","printer"]},
+  {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",guides:["profile","challenge","shortcuts"]},
+];
 
 export default function Home() {
   const [intro,setIntro]=useState(true);
@@ -166,10 +219,10 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="apps"?apps:guide==="profile"?profile:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
+  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="profile"?profile:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
   const step=steps[current]||steps[0];
   const image=step.image;
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`;
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:null;
   const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
@@ -194,10 +247,11 @@ export default function Home() {
       <button className="drawer-close" onClick={()=>setMenu(false)} aria-label="Menü schliessen">×</button>
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
       <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
-      {(Object.keys(guideNames) as GuideKey[]).map((key,i)=>{
+      <button className={!intro&&guide==="eduzh"?"active":""} onClick={()=>openGuide("eduzh")}><span>01</span><b>EduZH-Erstlogin</b></button>
+      {navigationGroups.map(group=><section className="nav-group" key={group.title}><h2><span>{group.number}</span><b>{group.title}</b>{group.subtitle}</h2>{group.guides.map((key,i)=>{
         const isChallenge=key==="challenge"||key==="shortcuts"||key==="profile";
-        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>0{i+1}</span><b>{isChallenge&&<em>Challenge</em>}{guideNames[key]}</b></button>
-      })}
+        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>{group.number}.{i+1}</span><b>{guideNames[key]}</b></button>
+      })}</section>)}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
       <section className="drawer-about" aria-labelledby="about-title">
         <small id="about-title">ÜBER DIESE SEITE</small>
@@ -212,7 +266,7 @@ export default function Home() {
       <div className="intro-copy">
         <img src="/fdu-logo-weiss.svg" alt="Kantonsschule Stadelhofen – Filiale Dübendorf"/>
         <h1>IKT-Einführung</h1>
-        <p>Wählen Sie eine Anleitung im Menü oder beginnen Sie mit dem EduZH-Erstlogin.</p>
+        <p>Alle beginnen mit dem EduZH-Erstlogin auf dem Smartphone. Danach wählen Sie Ihren weiteren Schulweg.</p>
         <button onClick={()=>openGuide("eduzh")}>Mit EduZH beginnen <span>→</span></button>
       </div>
       <aside className="wifi-card">
@@ -228,23 +282,28 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a,details"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className="visual-wrap">
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:<div className="challenge-card"><small>{guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:step.in2Mobile?<div className="in2-visual"><small>IN2 MOBILE</small><b>App installieren</b><span>iPhone oder Android</span></div>:step.flow?<div className={`flow-visual ${guide==="ugWorkflow"?"workflow-loop":""}`}><small>START-ABLAUF</small>{step.flow.map((item,index)=><div key={item} className={guide==="ugWorkflow"&&index>=2?"repeat-step":""}>{guide==="ugWorkflow"&&index===2&&<em>Für jede weitere Aufgabe</em>}<span>{String(index+1).padStart(2,"0")}</span><b>{item}</b>{index<step.flow!.length-1&&<i>↓</i>}</div>)}{guide==="ugWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 03 beginnen</p>}</div>:<div className="challenge-card"><small>{guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
         <div className="step-label"><span>Schritt {String(current+1).padStart(2,"0")}</span><i/>{step.phase}</div>
         <h2>{step.title}</h2><p>{step.text}</p>
-        {guide==="eduzh"&&current===1&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
+        {(guide==="eduzh"&&current===0||guide==="officeMobile"&&current===0)&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
         {guide==="eduzh"&&phone==="iphone"&&step.existingImage&&<details className="alternate-path"><summary>Authenticator enthält bereits Konten?</summary><p>{step.existingText}</p><div><figure><img src={step.existingImage} alt="Im Authenticator auf das Pluszeichen tippen"/><figcaption>1. Oben rechts auf «+» tippen</figcaption></figure><figure><img src={step.existingImage2} alt="Geschäfts- oder Schulkonto und danach Anmelden wählen"/><figcaption>2. Schulkonto und «Anmelden» wählen</figcaption></figure></div></details>}
         {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
+        {(guide==="ugWorkflow"||guide==="kgWorkflow")&&<section className="workflow-launch" aria-label="Moodle starten"><div className="edge-launch"><img src="/microsoft-edge-logo.png" alt="Microsoft Edge"/><p><strong>1. Microsoft Edge öffnen</strong><span>{guide==="ugWorkflow"?"Am Schul-Computer":"Auf Ihrem BYOD-Gerät"}</span></p></div><a href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer"><b>2. Moodle öffnen</b><span>Diese Adresse eintippen:</span><code>moodle.kst-fdu.ch/course/view.php?id=4</code><span>Aufgabenliste «IKT-Einführung» ↗</span></a></section>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
+        {guide==="printer"&&current===3&&<a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">Pixio im Browser öffnen ↗</a>}
         {guide==="profile"&&current===0&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Gestaltungsvorlage herunterladen ↓</a>}
         {guide==="shortcuts"&&current===steps.length-1&&<a className="further-tasks" href="/downloads/shortcut-uebersicht-programmieren.pdf" target="_blank" rel="noreferrer">Weitere Shortcut-Aufgaben und Übersicht als PDF öffnen ↗</a>}
+        {guide==="ugWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("officeMobile")}>Mit Schritt 02 weiter <span>→</span></button>}
+        {guide==="kgWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("wlan")}>Mit Schritt 02 weiter <span>→</span></button>}
+        {step.in2Mobile&&<section className="in2-codes" aria-label="IN2 Mobile herunterladen"><a href="https://apps.apple.com/ch/app/in2-mobile/id1560963697" target="_blank" rel="noreferrer"><img src="/screenshots/kg-intranet/in2-mobile-iphone-qr.png" alt="QR-Code für IN2 Mobile im Apple App Store"/><strong>iPhone</strong><span>App Store öffnen ↗</span></a><a href="https://play.google.com/store/apps/details?id=net.gyselroth.in2mobile&hl=de_CH" target="_blank" rel="noreferrer"><img src="/screenshots/kg-intranet/in2-mobile-android-qr.png" alt="QR-Code für IN2 Mobile bei Google Play"/><strong>Android</strong><span>Google Play öffnen ↗</span></a></section>}
         {guide==="eduzh"&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinden Sie unbedingt Ihr eigenes Beispiel und verwenden Sie es nur für dieses Konto.</p></aside>}
-        {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"&&<a className="moodle" href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer">Moodle-Kurs «IKT-Einführung» öffnen ↗</a>}</div>}
+        {current===steps.length-1&&<div className="finish-block"><div className="success">✓ Anleitung abgeschlossen</div>{guide==="eduzh"?<div className="path-choice"><strong>Wählen Sie Ihren Schulweg</strong><div><a href={guidePaths.ugWorkflow} onClick={event=>{event.preventDefault();openGuide("ugWorkflow")}}>Untergymnasium →</a><a href={guidePaths.kgWorkflow} onClick={event=>{event.preventDefault();openGuide("kgWorkflow")}}>Kurzzeitgymnasium / HMS →</a></div></div>:["officeMobile","intranetMobile","kgIntranet","printer","wlan","apps"].includes(guide)&&<><a className="moodle" href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer">In Moodle als erledigt markieren ↗</a><p className="moodle-flow">Öffnen Sie in Moodle den nächsten Link. Er führt Sie zurück zu dieser Seite zum nächsten Schritt.</p></>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
-        <a className="pdf-download" href={pdfHref}>↗ Aktuelle Anleitung als PDF öffnen</a>
+        {pdfHref&&<a className="pdf-download" href={pdfHref}>↗ Aktuelle Anleitung als PDF öffnen</a>}
         <p className="keyboard"><span className="desktop-hint">Mit den Pfeiltasten navigieren.</span><span className="mobile-hint">Nach links oder rechts wischen.</span></p>
       </article>
     </section>
