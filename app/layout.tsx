@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "IKT-Einführung | KST FDU",
-  description: "Interaktive Anleitungen für EduZH, WLAN, Microsoft 365 und BYOD-Grundlagen.",
+  description: "Interaktive IKT-Anleitungen für Schüler*innen und Klassenlehrpersonen.",
   openGraph: {
     title: "IKT-Einführung der KST FDU",
-    description: "EduZH, WLAN, Microsoft 365 und BYOD-Challenges",
-    images: [{ url: "/og-ikt-v2.png", width: 1200, height: 630, alt: "IKT-Einführung – EduZH, WLAN, Microsoft 365 und BYOD" }],
+    description: "Für Schüler*innen und Klassenlehrpersonen",
+    images: [{ url: "/og-klp-2026.png", width: 1730, height: 909, alt: "IKT-Einführung – Für Schüler*innen und Klassenlehrpersonen" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "IKT-Einführung der KST FDU",
-    description: "EduZH, WLAN, Microsoft 365 und BYOD-Challenges",
-    images: ["/og-ikt-v2.png"],
+    description: "Für Schüler*innen und Klassenlehrpersonen",
+    images: ["/og-klp-2026.png"],
   },
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png", sizes: "747x747" }],

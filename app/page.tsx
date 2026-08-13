@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; flow?: string[]; in2Mobile?: boolean; existingImage?: string; existingImage2?: string; existingText?: string };
-type GuideKey = "eduzh" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile" | "peerSupport";
+type GuideKey = "eduzh" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile" | "peerSupport" | "klpCalendar" | "klpFobizz";
 
 const eduzhIphone: Step[] = [
   {image:"/screenshots/appstore-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den App Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr iPhone – noch keinen Computer."},
@@ -203,13 +203,34 @@ const profile: Step[] = [
   {phase:"Bonus",title:"Bonus für schnelle Profis",text:"Fügen Sie ein passendes Symbol, Emoji oder kleines Bild ein, nutzen Sie passende Farben und schreiben Sie zu mindestens einem Punkt einen kurzen Satz statt nur eines Wortes. Wenn Sie fertig sind, helfen Sie einer Person in Ihrer Nähe.",shortcut:"+"},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",peerSupport:"Peer-Supporter"};
-const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",peerSupport:"/peer-supporter"};
+const klpCalendar: Step[] = [
+  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"Intranet",title:"Kalender-Link im Stundenplan öffnen",text:"Öffnen Sie im Intranet den Bereich «Stundenplan». Beim Abschnitt «Termine» klicken Sie auf das RSS-/Abo-Symbol. Kopieren Sie den angezeigten Kalender-Link – Sie brauchen ihn nur einmal."},
+  {phase:"Google Kalender",title:"Schulkalender in Google Kalender abonnieren",text:"Öffnen Sie Google Kalender im Browser. Klicken Sie links neben «Weitere Kalender» auf «+» und wählen Sie «Per URL». Fügen Sie den kopierten Kalender-Link ein und bestätigen Sie mit «Kalender hinzufügen».",tip:"Änderungen im Schulkalender werden danach automatisch übernommen. Die erste Aktualisierung kann etwas dauern."},
+  {phase:"Apple Kalender · Mac",title:"Schulkalender auf dem Mac abonnieren",text:"Öffnen Sie die App «Kalender». Wählen Sie in der Menüleiste «Ablage» → «Neues Kalenderabonnement», fügen Sie den Kalender-Link ein und klicken Sie auf «Abonnieren». Wählen Sie anschliessend, wie oft der Kalender aktualisiert werden soll."},
+  {phase:"Apple Kalender · iPhone/iPad",title:"Schulkalender auf iPhone oder iPad abonnieren",text:"Öffnen Sie «Einstellungen» → «Apps» → «Kalender» → «Kalenderaccounts» → «Account hinzufügen» → «Andere» → «Kalenderabo hinzufügen». Fügen Sie den Kalender-Link ein, bestätigen Sie und speichern Sie das Abo."},
+  {phase:"Kontrolle",title:"Termine prüfen",text:"Öffnen Sie die Kalender-App und blenden Sie den neuen Schulkalender ein. Prüfen Sie, ob die nächsten Schultermine sichtbar sind. Der Kalender ist ein Abo: Änderungen im Intranet erscheinen automatisch, Sie müssen ihn nicht erneut importieren."},
+];
+
+const klpFobizz: Step[] = [
+  {image:"/screenshots/klp/fobizz/01-mein-fobizz.png",phase:"Start",title:"«Mein fobizz» öffnen",text:"Melden Sie sich bei fobizz an. Klicken Sie oben rechts auf Ihr Profilbild und öffnen Sie «Mein fobizz». Von hier aus erreichen Sie die Bereiche für Ihren Unterricht."},
+  {image:"/screenshots/klp/fobizz/02-klassenraeume-menu.png",phase:"Klassenräume",title:"Zu «Klassenräume» wechseln",text:"Wählen Sie im Menü «Klassenräume». Ein Klassenraum bildet eine Lerngruppe ab und bleibt bei der Jahresvariante für das ganze Schuljahr bestehen."},
+  {image:"/screenshots/klp/fobizz/03-klassenraum-auswahl.png",phase:"Klassenräume",title:"Passende Laufzeit wählen",text:"Klicken Sie auf «Anlegen». Verwenden Sie «Klassenraum · 1 Jahr» für Ihre Klasse. «Klassenraum · 24 h» eignet sich für einen einmaligen, kurzen Einsatz."},
+  {image:"/screenshots/klp/fobizz/04-klassenraum-anlegen.png",phase:"Klassenraum anlegen",title:"Klasse benennen und Anzahl Zugänge festlegen",text:"Geben Sie dem Klassenraum einen eindeutigen Namen, zum Beispiel «K26b». Tragen Sie die Anzahl Schüler*innen ein und klicken Sie auf «Klassenraum anlegen». Kolleg*innen können Sie später im Reiter «Lehrkräfte» einladen."},
+  {image:"/screenshots/klp/fobizz/05-zugang-projekt.png",phase:"Zugang & Projekt",title:"Zugangscodes und erstes Projekt vorbereiten",text:"Über «Zugangscodes anzeigen» erhalten Sie die anonymen Codes für Ihre Schüler*innen. Mit «Neues Projekt anlegen» erstellen Sie eine konkrete Unterrichtsaktivität und fügen dort Arbeitsauftrag, Materialien oder Tools hinzu.",tip:"Notieren Sie die Zuordnung zwischen Code und Person nur dann, wenn Sie individuelle Aktivitäten nachvollziehen möchten."},
+  {image:"/screenshots/klp/fobizz/09-zugangscodes-drucken.png",phase:"Zugangscodes",title:"Codes ausdrucken und verteilen",text:"Wählen Sie beim Ausdruck der Zugangscodes «Drucken». Verteilen Sie jeder Person genau einen Code. Die Schüler*innen öffnen go.fobizz.com beziehungsweise scannen den QR-Code – ein eigenes fobizz-Konto ist dafür nicht nötig."},
+  {image:"/screenshots/klp/fobizz/06-assistenten-uebersicht.png",phase:"KI-Assistenten",title:"Eigenen Assistenten starten",text:"Öffnen Sie «Tools» → «KI Assistenten» und wählen Sie links «Eigene Assistenten». Klicken Sie anschliessend auf «Assistent anlegen». Ein Assistent ist ein vorkonfigurierter Chatbot für eine klar definierte Unterrichtsaufgabe."},
+  {image:"/screenshots/klp/fobizz/07-assistent-anlegen.png",phase:"KI-Assistenten",title:"Rolle und Regeln festlegen",text:"Geben Sie Name und kurze Beschreibung ein. Beschreiben Sie unter «Rolle und Instruktionen» konkret, wobei der Assistent hilft, was er nicht tun soll und wie er antwortet. Beispielsweise: zuerst eine Rückfrage stellen, dann nur einen Hinweis geben und keine vollständige Lösung liefern."},
+  {image:"/screenshots/klp/fobizz/08-assistent-teilen.png",phase:"Im Unterricht einsetzen",title:"Assistent in ein Projekt teilen",text:"Öffnen Sie beim fertigen Assistenten «Teilen». Unter «Im Klassenraum» wählen Sie den Klassenraum und das gewünschte Projekt. So steht der Assistent den Schüler*innen innerhalb der zeitlich freigeschalteten Unterrichtsaktivität zur Verfügung."},
+];
+
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",peerSupport:"Peer-Supporter",klpCalendar:"Schulkalender abonnieren",klpFobizz:"fobizz im Unterricht"};
+const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",peerSupport:"/peer-supporter",klpCalendar:"/klp/schulkalender",klpFobizz:"/klp/fobizz"};
 const pathGuides: Record<string,GuideKey> = Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])) as Record<string,GuideKey>;
 const navigationGroups: { number: string; title: string; subtitle: string; guides: GuideKey[] }[] = [
   {number:"2a",title:"UG",subtitle:"Schul-Computer",guides:["officeMobile","intranetMobile"]},
   {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",guides:["wlan","apps","kgIntranet","printer"]},
   {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",guides:["profile","challenge","shortcuts"]},
+  {number:"KLP",title:"Klassenlehrpersonen",subtitle:"Organisation & Unterricht",guides:["klpCalendar","klpFobizz"]},
 ];
 
 export default function Home() {
@@ -223,7 +244,7 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="peerSupport"?peerSupport:guide==="profile"?profile:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
+  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="peerSupport"?peerSupport:guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
   const step=steps[current]||steps[0];
   const image=step.image;
   const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:null;
