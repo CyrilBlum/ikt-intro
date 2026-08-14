@@ -334,7 +334,7 @@ export default function Home() {
       </article>
     </section>
     </>}
-    <img className="bottom-decoration" src="/glatt-linie-footer.png" alt="" aria-hidden="true"/>
+    <img className="bottom-decoration" src="/glatt-linie-footer-20260814.png" alt="" aria-hidden="true"/>
     <footer><strong>© 2026 Cyril Blum</strong><span>Kantonsschule Stadelhofen · Filiale Dübendorf</span></footer>
     {zoom&&image&&<div className="lightbox" role="dialog" aria-modal="true" onClick={()=>setZoom(false)}><button aria-label="Schliessen">×</button><img src={image} alt=""/></div>}
     {qrOpen&&<div className="qr-lightbox" role="dialog" aria-modal="true" aria-label="QR-Codes für WLAN und IKT-Webseite" onClick={()=>setQrOpen(false)}>
