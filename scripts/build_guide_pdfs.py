@@ -48,6 +48,57 @@ def draw_footer(c, page_no, total):
     c.drawString(12*mm, 6.5*mm, "© 2026 Cyril Blum · Kantonsschule Stadelhofen · Filiale Dübendorf")
     c.drawRightString(w-12*mm, 6.5*mm, f"Seite {page_no} / {total}")
 
+def draw_next_steps(c, page_no, total, platform):
+    """Draw the shared last page for pupils after their EduZH first login."""
+    w, h = A4
+    moodle_url = "https://moodle.kst-fdu.ch/course/view.php?id=4"
+    wlan_url = "https://ikt.in-form-atik.ch/wlan"
+
+    c.setFillColor(PAPER); c.rect(0, 0, w, h, fill=1, stroke=0)
+    c.setFillColor(TEAL); c.rect(0, h-18*mm, w, 18*mm, fill=1, stroke=0)
+    c.setFillColor(white); c.setFont("Helvetica-Bold", 10)
+    c.drawString(12*mm, h-11*mm, "IKT-Einführung")
+    c.setFont("Helvetica", 7); c.drawRightString(w-12*mm, h-11*mm, platform)
+
+    c.setFillColor(INK); c.setFont("Helvetica-Bold", 23)
+    c.drawString(12*mm, h-34*mm, "So geht es weiter")
+    c.setFillColor(TEAL); c.setFont("Helvetica", 9.5)
+    c.drawString(12*mm, h-42*mm, "Wähle den Weg, der zu deiner Abteilung gehört.")
+
+    cards = [
+        ("UNTERGYMNASIUM", "Auf dem Schullaptop weitermachen", [
+            "1. Melde dich am Schullaptop an.",
+            "2. Öffne Microsoft Edge.",
+            "3. Öffne den Moodle-Kurs «IKT-Einführung»."
+        ], moodle_url, "Moodle öffnen"),
+        ("KURZZEITGYMNASIUM / HMS", "Laptop mit dem Schul-WLAN verbinden", [
+            "1. Verbinde deinen Laptop mit «KTZH-S».",
+            "2. Lies die WLAN-Anleitung auf deinem Handy.",
+            "3. Folge dort den Schritten für Windows oder macOS."
+        ], wlan_url, "WLAN-Anleitung auf dem Handy öffnen"),
+    ]
+    card_x, card_w, card_h = 12*mm, w-24*mm, 67*mm
+    for index, (label, heading, steps, url, link_text) in enumerate(cards):
+        card_y = h - (58 + index*75)*mm - card_h
+        c.setFillColor(HexColor("#f1f5e3")); c.roundRect(card_x, card_y, card_w, card_h, 3*mm, fill=1, stroke=0)
+        c.setFillColor(GREEN); c.roundRect(card_x+5*mm, card_y+card_h-13*mm, 47*mm, 7*mm, 1.2*mm, fill=1, stroke=0)
+        c.setFillColor(white); c.setFont("Helvetica-Bold", 6.4)
+        c.drawCentredString(card_x+28.5*mm, card_y+card_h-10.5*mm, label)
+        c.setFillColor(INK); c.setFont("Helvetica-Bold", 14)
+        c.drawString(card_x+5*mm, card_y+card_h-22*mm, heading)
+        c.setFont("Helvetica", 8.8)
+        for step_index, step in enumerate(steps):
+            c.drawString(card_x+5*mm, card_y+card_h-(31 + step_index*7)*mm, step)
+        link_y = card_y + 7*mm
+        c.setFillColor(BLUE); c.roundRect(card_x+5*mm, link_y, 85*mm, 10*mm, 1.5*mm, fill=1, stroke=0)
+        c.setFillColor(white); c.setFont("Helvetica-Bold", 7.3)
+        c.drawString(card_x+9*mm, link_y+3.6*mm, link_text)
+        c.linkURL(url, (card_x+5*mm, link_y, card_x+90*mm, link_y+10*mm), relative=0)
+        c.setFillColor(TEAL); c.setFont("Helvetica", 6.9)
+        c.drawString(card_x+95*mm, link_y+3.6*mm, url.replace("https://", ""))
+
+    draw_footer(c, page_no, total)
+
 def draw_image(c, path, x, y, max_w, max_h):
     with Image.open(path) as im:
         iw, ih = im.size
@@ -121,8 +172,9 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
     c.setAuthor("Cyril Blum · Kantonsschule Stadelhofen · Filiale Dübendorf")
     c.setSubject("IKT-Einführung")
     c.setCreator("IKT-Einführung KST FDU")
-    total_pages = (len(steps)+1)//2
-    for page_idx in range(total_pages):
+    step_pages = (len(steps)+1)//2
+    total_pages = step_pages + (1 if filename.startswith("eduzh-") else 0)
+    for page_idx in range(step_pages):
         c.setFillColor(PAPER); c.rect(0,0,w,h,fill=1,stroke=0)
         c.setFillColor(TEAL); c.rect(0,h-18*mm,w,18*mm,fill=1,stroke=0)
         c.setFillColor(white); c.setFont("Helvetica-Bold",10); c.drawString(12*mm,h-11*mm,title)
@@ -135,6 +187,9 @@ def make_pdf(filename, title, steps, image_choice="image", platform=""):
             c.setStrokeColor(LINE); c.setLineWidth(.7); c.line(row_x, 142*mm, row_x+row_w, 142*mm)
             draw_step(c, steps[first+1], first+2, image_choice, platform, row_x, 16*mm, row_w, row_h)
         draw_footer(c,page_idx+1,total_pages); c.showPage()
+    if filename.startswith("eduzh-"):
+        draw_next_steps(c, total_pages, total_pages, platform)
+        c.showPage()
     c.save()
     shutil.copy2(out, PUBLIC / filename)
     return out
