@@ -66,44 +66,48 @@ def draw_next_steps(c, page_no, total, platform):
     c.drawString(12*mm, h-42*mm, "Wähle den Weg, der zu deiner Abteilung gehört.")
 
     cards = [
-        ("UNTERGYMNASIUM", "Auf dem Schullaptop weitermachen", [
-            "1. Melde dich am Schullaptop an.",
-            "2. Öffne Microsoft Edge.",
-            "3. Öffne den Moodle-Kurs «IKT-Einführung»."
-        ], [(moodle_url, "Moodle öffnen")]),
-        ("KURZZEITGYMNASIUM / HMS", "Mit dem eigenen Laptop weitermachen", [
-            "1. Melde dich auf deinem eigenen Laptop an.",
-            "2. Öffne auf deinem Handy die WLAN-Anleitung.",
-            "3. Verbinde den Laptop gemäss Anleitung mit «KTZH-S».",
-            "4. Öffne danach Moodle auf deinem Laptop."
-        ], [
-            (wlan_url, "WLAN-Anleitung (Handy)"),
-            (moodle_url, "Moodle (Laptop)"),
-        ]),
+        ("UNTERGYMNASIUM", "Auf dem Schullaptop weitermachen", 172*mm, 67*mm),
+        ("KURZZEITGYMNASIUM / HMS", "Mit dem eigenen Laptop weitermachen", 72*mm, 88*mm),
     ]
-    card_x, card_w, card_h = 12*mm, w-24*mm, 67*mm
-    for index, (label, heading, steps, links) in enumerate(cards):
-        card_y = h - (58 + index*75)*mm - card_h
+    card_x, card_w = 12*mm, w-24*mm
+
+    def draw_written_link(label, url, baseline_y):
+        link_x = card_x + 5*mm
+        visible_url = url.replace("https://", "")
+        c.setFillColor(TEAL); c.setFont("Helvetica-Bold", 6.4)
+        c.drawString(link_x, baseline_y+5.2*mm, label)
+        c.setFillColor(BLUE); c.setFont("Helvetica-Bold", 10.2)
+        c.drawString(link_x, baseline_y, visible_url)
+        c.setStrokeColor(BLUE); c.setLineWidth(.6)
+        c.line(link_x, baseline_y-0.8*mm, card_x+card_w-5*mm, baseline_y-0.8*mm)
+        c.linkURL(url, (link_x, baseline_y-1.5*mm, card_x+card_w-5*mm, baseline_y+4.5*mm), relative=0)
+
+    for index, (label, heading, card_y, card_h) in enumerate(cards):
+        card_top = card_y + card_h
         c.setFillColor(HexColor("#f1f5e3")); c.roundRect(card_x, card_y, card_w, card_h, 3*mm, fill=1, stroke=0)
-        c.setFillColor(GREEN); c.roundRect(card_x+5*mm, card_y+card_h-13*mm, 47*mm, 7*mm, 1.2*mm, fill=1, stroke=0)
+        c.setFillColor(GREEN); c.roundRect(card_x+5*mm, card_top-13*mm, 47*mm, 7*mm, 1.2*mm, fill=1, stroke=0)
         c.setFillColor(white); c.setFont("Helvetica-Bold", 6.4)
-        c.drawCentredString(card_x+28.5*mm, card_y+card_h-10.5*mm, label)
+        c.drawCentredString(card_x+28.5*mm, card_top-10.5*mm, label)
         c.setFillColor(INK); c.setFont("Helvetica-Bold", 14)
-        c.drawString(card_x+5*mm, card_y+card_h-22*mm, heading)
+        c.drawString(card_x+5*mm, card_top-22*mm, heading)
         c.setFont("Helvetica", 8.8)
-        for step_index, step in enumerate(steps):
-            c.drawString(card_x+5*mm, card_y+card_h-(29 + step_index*5.7)*mm, step)
-        link_y = card_y + 7*mm
-        link_w = 85*mm
-        for link_index, (url, link_text) in enumerate(links):
-            link_x = card_x + (5 + link_index*89)*mm
-            c.setFillColor(BLUE); c.roundRect(link_x, link_y, link_w, 10*mm, 1.5*mm, fill=1, stroke=0)
-            c.setFillColor(white); c.setFont("Helvetica-Bold", 7.3)
-            c.drawString(link_x+4*mm, link_y+3.6*mm, link_text)
-            c.linkURL(url, (link_x, link_y, link_x+link_w, link_y+10*mm), relative=0)
-        if len(links) == 1:
-            c.setFillColor(TEAL); c.setFont("Helvetica", 6.9)
-            c.drawString(card_x+95*mm, link_y+3.6*mm, links[0][0].replace("https://", ""))
+        if index == 0:
+            ug_steps = [
+                "1. Melde dich am Schullaptop an.",
+                "2. Öffne Microsoft Edge.",
+                "3. Öffne den Moodle-Kurs «IKT-Einführung».",
+            ]
+            for step_index, step in enumerate(ug_steps):
+                c.drawString(card_x+5*mm, card_top-(29 + step_index*5.7)*mm, step)
+            draw_written_link("AUF DEM SCHULLAPTOP", moodle_url, card_top-54*mm)
+        else:
+            c.drawString(card_x+5*mm, card_top-29*mm, "1. Melde dich auf deinem eigenen Laptop an.")
+            c.drawString(card_x+5*mm, card_top-35*mm, "2. Öffne auf deinem Handy die WLAN-Anleitung.")
+            draw_written_link("AUF DEM HANDY", wlan_url, card_top-49.5*mm)
+            c.setFillColor(INK); c.setFont("Helvetica", 8.8)
+            c.drawString(card_x+5*mm, card_top-59*mm, "3. Verbinde den Laptop gemäss Anleitung mit «KTZH-S».")
+            c.drawString(card_x+5*mm, card_top-65*mm, "4. Öffne danach Moodle auf deinem Laptop.")
+            draw_written_link("AUF DEM LAPTOP", moodle_url, card_top-79*mm)
 
     draw_footer(c, page_no, total)
 
