@@ -70,15 +70,19 @@ def draw_next_steps(c, page_no, total, platform):
             "1. Melde dich am Schullaptop an.",
             "2. Öffne Microsoft Edge.",
             "3. Öffne den Moodle-Kurs «IKT-Einführung»."
-        ], moodle_url, "Moodle öffnen"),
-        ("KURZZEITGYMNASIUM / HMS", "Laptop mit dem Schul-WLAN verbinden", [
-            "1. Verbinde deinen Laptop mit «KTZH-S».",
-            "2. Lies die WLAN-Anleitung auf deinem Handy.",
-            "3. Folge dort den Schritten für Windows oder macOS."
-        ], wlan_url, "WLAN-Anleitung auf dem Handy öffnen"),
+        ], [(moodle_url, "Moodle öffnen")]),
+        ("KURZZEITGYMNASIUM / HMS", "Mit dem eigenen Laptop weitermachen", [
+            "1. Melde dich auf deinem eigenen Laptop an.",
+            "2. Öffne auf deinem Handy die WLAN-Anleitung.",
+            "3. Verbinde den Laptop gemäss Anleitung mit «KTZH-S».",
+            "4. Öffne danach Moodle auf deinem Laptop."
+        ], [
+            (wlan_url, "WLAN-Anleitung (Handy)"),
+            (moodle_url, "Moodle (Laptop)"),
+        ]),
     ]
     card_x, card_w, card_h = 12*mm, w-24*mm, 67*mm
-    for index, (label, heading, steps, url, link_text) in enumerate(cards):
+    for index, (label, heading, steps, links) in enumerate(cards):
         card_y = h - (58 + index*75)*mm - card_h
         c.setFillColor(HexColor("#f1f5e3")); c.roundRect(card_x, card_y, card_w, card_h, 3*mm, fill=1, stroke=0)
         c.setFillColor(GREEN); c.roundRect(card_x+5*mm, card_y+card_h-13*mm, 47*mm, 7*mm, 1.2*mm, fill=1, stroke=0)
@@ -88,14 +92,18 @@ def draw_next_steps(c, page_no, total, platform):
         c.drawString(card_x+5*mm, card_y+card_h-22*mm, heading)
         c.setFont("Helvetica", 8.8)
         for step_index, step in enumerate(steps):
-            c.drawString(card_x+5*mm, card_y+card_h-(31 + step_index*7)*mm, step)
+            c.drawString(card_x+5*mm, card_y+card_h-(29 + step_index*5.7)*mm, step)
         link_y = card_y + 7*mm
-        c.setFillColor(BLUE); c.roundRect(card_x+5*mm, link_y, 85*mm, 10*mm, 1.5*mm, fill=1, stroke=0)
-        c.setFillColor(white); c.setFont("Helvetica-Bold", 7.3)
-        c.drawString(card_x+9*mm, link_y+3.6*mm, link_text)
-        c.linkURL(url, (card_x+5*mm, link_y, card_x+90*mm, link_y+10*mm), relative=0)
-        c.setFillColor(TEAL); c.setFont("Helvetica", 6.9)
-        c.drawString(card_x+95*mm, link_y+3.6*mm, url.replace("https://", ""))
+        link_w = 85*mm
+        for link_index, (url, link_text) in enumerate(links):
+            link_x = card_x + (5 + link_index*89)*mm
+            c.setFillColor(BLUE); c.roundRect(link_x, link_y, link_w, 10*mm, 1.5*mm, fill=1, stroke=0)
+            c.setFillColor(white); c.setFont("Helvetica-Bold", 7.3)
+            c.drawString(link_x+4*mm, link_y+3.6*mm, link_text)
+            c.linkURL(url, (link_x, link_y, link_x+link_w, link_y+10*mm), relative=0)
+        if len(links) == 1:
+            c.setFillColor(TEAL); c.setFont("Helvetica", 6.9)
+            c.drawString(card_x+95*mm, link_y+3.6*mm, links[0][0].replace("https://", ""))
 
     draw_footer(c, page_no, total)
 
