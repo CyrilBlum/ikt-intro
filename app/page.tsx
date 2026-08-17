@@ -323,7 +323,7 @@ export default function Home() {
       <section className="drawer-about" aria-labelledby="about-title">
         <small id="about-title">ÜBER DIESE SEITE</small>
         <p>Erstellt von <strong>Cyril Blum</strong></p>
-        <div><a href="https://cblum.ch/" target="_blank" rel="noreferrer">cblum.ch ↗</a><a href="https://github.com/CyrilBlum/ikt-intro" target="_blank" rel="noreferrer">GitHub-Repository ↗</a><a href={guidePaths.peerSupport} onClick={event=>{event.preventDefault();openGuide("peerSupport")}}>Drucker-BYOD ↗</a></div>
+        <div><a href="https://cblum.ch/" target="_blank" rel="noreferrer">cblum.ch ↗</a><a href="https://github.com/CyrilBlum/ikt-intro" target="_blank" rel="noreferrer">GitHub-Repository ↗</a></div>
       </section>
     </aside>
 
