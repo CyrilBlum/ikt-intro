@@ -339,7 +339,6 @@ export default function Home() {
           </div>
           <div className="peer-download-cards">
             <a className="peer-dl-card sh-card" href="/downloads/macOS-Printer-Connect.sh" download>
-              <div className="peer-dl-icon">📜</div>
               <div className="peer-dl-info">
                 <span className="peer-dl-tag">SHELL-SKRIPT · 1.4 KB</span>
                 <strong>macOS-Printer-Connect.sh</strong>
@@ -347,7 +346,6 @@ export default function Home() {
               </div>
             </a>
             <a className="peer-dl-card pkg-card" href="/downloads/HewlettPackardPrinterDrivers.pkg" download>
-              <div className="peer-dl-icon">📦</div>
               <div className="peer-dl-info">
                 <span className="peer-dl-tag">TREIBERPAKET · 263 MB</span>
                 <strong>HewlettPackardPrinterDrivers.pkg</strong>
@@ -357,10 +355,10 @@ export default function Home() {
           </div>
           <div className="peer-quick-links">
             <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_macOS.pdf" target="_blank" rel="noreferrer">
-              <span>📄</span> PDF-Anleitung öffnen ↗
+              PDF-Anleitung öffnen ↗
             </a>
             <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
-              <span>🌐</span> Pixio Web-App öffnen ↗
+              Pixio Web-App öffnen ↗
             </a>
           </div>
         </div>}
@@ -371,7 +369,6 @@ export default function Home() {
           </div>
           <div className="peer-download-cards">
             <a className="peer-dl-card zip-card" href="/downloads/Win-Printer-Connect.zip" download>
-              <div className="peer-dl-icon">📁</div>
               <div className="peer-dl-info">
                 <span className="peer-dl-tag">ZIP-ARCHIV · 31 MB</span>
                 <strong>Win-Printer-Connect.zip</strong>
@@ -381,10 +378,10 @@ export default function Home() {
           </div>
           <div className="peer-quick-links">
             <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_Windows.pdf" target="_blank" rel="noreferrer">
-              <span>📄</span> PDF-Anleitung öffnen ↗
+              PDF-Anleitung öffnen ↗
             </a>
             <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
-              <span>🌐</span> Pixio Web-App öffnen ↗
+              Pixio Web-App öffnen ↗
             </a>
           </div>
         </div>}
