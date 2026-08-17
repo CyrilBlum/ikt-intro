@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; flow?: string[]; in2Mobile?: boolean; existingImage?: string; existingImage2?: string; existingText?: string };
-type GuideKey = "eduzh" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile" | "peerSupport" | "klpCalendar" | "klpFobizz";
+type GuideKey = "eduzh" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile" | "peerSupport" | "beamerAirserver" | "klpCalendar" | "klpFobizz";
 
 const eduzhIphone: Step[] = [
   {image:"/screenshots/appstore-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den App Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr iPhone – noch keinen Computer."},
@@ -136,17 +136,19 @@ const kgWorkflow: Step[] = [
 ];
 
 const peerSupportMac: Step[] = [
-  {phase:"Peer-Supporter · macOS Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Dieses Skript richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem macOS-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: macOS Sonoma (14+), Internetverbindung & Admin-Rechte (sudo). Speichern Sie das Skript (.sh) und das Treiberpaket (.pkg) im selben Ordner.",shortcut:"sh + pkg",flow:["Skript (.sh) & Treiberpaket (.pkg) herunterladen","Persönliche IPP-URL aus Pixio kopieren","Skript im Terminal ausführbar machen & starten","IPP-URL einfügen & Admin-Passwort eingeben"]},
+  {phase:"Lehrpersonen · macOS Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Dieses Skript richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem macOS-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: macOS Sonoma (14+), Internetverbindung & Admin-Rechte (sudo). Speichern Sie das Skript (.sh) und das Treiberpaket (.pkg) im selben Ordner.",shortcut:"sh + pkg",flow:["Skript (.sh) & Treiberpaket (.pkg) herunterladen","Persönliche IPP-URL aus Pixio kopieren","Skript im Terminal ausführbar machen & starten","IPP-URL einfügen & Admin-Passwort eingeben"]},
   {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
-  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für FDU) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"},
-  {phase:"Peer-Supporter · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
+  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für FDU) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"}
 ];
 
 const peerSupportWindows: Step[] = [
-  {phase:"Peer-Supporter · Windows Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Diese Batch-Datei richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem Windows-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: Windows 10 / 11, Internetverbindung & Administrator-Rechte. Laden Sie das ZIP-Archiv herunter und entpacken Sie es vor dem Start.",shortcut:"bat + zip",flow:["ZIP-Archiv (Win-Printer-Connect.zip) herunterladen & entpacken","Persönliche IPP-URL aus Pixio kopieren","Win-Printer-Connect.bat per Doppelklick starten","IPP-URL mit Ctrl+V einfügen & Enter drücken"]},
+  {phase:"Lehrpersonen · Windows Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Diese Batch-Datei richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem Windows-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: Windows 10 / 11, Internetverbindung & Administrator-Rechte. Laden Sie das ZIP-Archiv herunter und entpacken Sie es vor dem Start.",shortcut:"bat + zip",flow:["ZIP-Archiv (Win-Printer-Connect.zip) herunterladen & entpacken","Persönliche IPP-URL aus Pixio kopieren","Win-Printer-Connect.bat per Doppelklick starten","IPP-URL mit Ctrl+V einfügen & Enter drücken"]},
   {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
-  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Batch-Datei",title:"Win-Printer-Connect.bat ausführen",text:"Öffnen Sie den entpackten Ordner und führen Sie «Win-Printer-Connect.bat» aus (Rechtsklick → Als Administrator ausführen). Füge bei der Abfrage «Verbindungsname:» die kopierte IPP-URL ein und drücke Enter.",tip:"Der Drucker wird anschliessend unter dem Namen «FDU» auf Ihrem PC eingerichtet.",shortcut:"CMD"},
-  {phase:"Peer-Supporter · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
+  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Batch-Datei",title:"Win-Printer-Connect.bat ausführen",text:"Öffnen Sie den entpackten Ordner und führen Sie «Win-Printer-Connect.bat» aus (Rechtsklick → Als Administrator ausführen). Füge bei der Abfrage «Verbindungsname:» die kopierte IPP-URL ein und drücke Enter.",tip:"Der Drucker wird anschliessend unter dem Namen «FDU» auf Ihrem PC eingerichtet.",shortcut:"CMD"}
+];
+
+const beamerAirserver: Step[] = [
+  {phase:"Lehrpersonen · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",tip:"Die PDF-Anleitung fasst alle Funktionen im Unterrichtsraum auf 2 Seiten übersichtlich zusammen.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
 ];
 
 const challengeWindows: Step[] = [
@@ -232,15 +234,20 @@ const klpFobizz: Step[] = [
   {image:"/screenshots/klp/fobizz/08-assistent-teilen.png",phase:"Im Unterricht einsetzen",title:"Assistent in ein Projekt teilen",text:"Öffnen Sie beim fertigen Assistenten «Teilen». Unter «Im Klassenraum» wählen Sie den Klassenraum und das gewünschte Projekt. So steht der Assistent den Schüler*innen innerhalb der zeitlich freigeschalteten Unterrichtsaktivität zur Verfügung."},
 ];
 
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",peerSupport:"Peer-Supporter",klpCalendar:"Schulkalender abonnieren",klpFobizz:"fobizz im Unterricht"};
-const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",peerSupport:"/peer-supporter",klpCalendar:"/klp/schulkalender",klpFobizz:"/klp/fobizz"};
-const pathGuides: Record<string,GuideKey> = Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])) as Record<string,GuideKey>;
+const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",peerSupport:"Drucker-Installation (BYOD)",beamerAirserver:"Beamer & AirServer",klpCalendar:"Schulkalender abonnieren",klpFobizz:"fobizz im Unterricht"};
+const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",peerSupport:"/lehrpersonen/drucker-installation",beamerAirserver:"/lehrpersonen/beamer-airserver",klpCalendar:"/lehrpersonen/schulkalender",klpFobizz:"/lehrpersonen/fobizz"};
+const pathGuides: Record<string,GuideKey> = {
+  ...Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])),
+  "/peer-supporter": "peerSupport",
+  "/beamer-airserver": "beamerAirserver",
+  "/klp/schulkalender": "klpCalendar",
+  "/klp/fobizz": "klpFobizz"
+} as Record<string,GuideKey>;
 const navigationGroups: { number: string; title: string; subtitle: string; guides: GuideKey[] }[] = [
   {number:"2a",title:"UG",subtitle:"Schul-Computer",guides:["officeMobile","intranetMobile"]},
   {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",guides:["wlan","apps","kgIntranet","printer"]},
   {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",guides:["profile","challenge","shortcuts"]},
-  {number:"KLP",title:"Klassenlehrpersonen",subtitle:"Organisation & Unterricht",guides:["klpCalendar","klpFobizz"]},
-  {number:"PEER",title:"Peer-Supporter",subtitle:"Zusatzmaterial & Druckertreiber",guides:["peerSupport"]},
+  {number:"LP",title:"Lehrpersonen",subtitle:"Organisation & Medientechnik",guides:["klpCalendar","klpFobizz","peerSupport","beamerAirserver"]},
 ];
 
 export default function Home() {
@@ -254,11 +261,11 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="peerSupport"?(computer==="windows"?peerSupportWindows:peerSupportMac):guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
+  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="beamerAirserver"?beamerAirserver:guide==="peerSupport"?(computer==="windows"?peerSupportWindows:peerSupportMac):guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
   const step=steps[current]||steps[0];
   const image=step.image;
-  const desktopAppGuide=["intranetMobile","kgIntranet","printer","klpCalendar","klpFobizz"].includes(guide);
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?`/downloads/Anleitung_BYOD_Printing_${computer==="mac"?"macOS":"Windows"}.pdf`:null;
+  const desktopAppGuide=["intranetMobile","kgIntranet","printer","klpCalendar","klpFobizz","beamerAirserver"].includes(guide);
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?`/downloads/Anleitung_BYOD_Printing_${computer==="mac"?"macOS":"Windows"}.pdf`:guide==="beamerAirserver"?"/downloads/anleitung-beamer-unterrichtsraum.pdf":null;
   const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
@@ -284,7 +291,7 @@ export default function Home() {
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
       <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
       <button className={!intro&&guide==="eduzh"?"active":""} onClick={()=>openGuide("eduzh")}><span>01</span><b>EduZH-Erstlogin</b></button>
-      {navigationGroups.map(group=><section className="nav-group" key={group.title}><h2><span>{group.number}</span><b>{group.title}</b>{group.subtitle}</h2>{group.guides.map((key,i)=>{
+      {navigationGroups.map(group=><section className={`nav-group group-${group.number.toLowerCase()}`} key={group.title}><h2><span>{group.number}</span><b>{group.title}</b>{group.subtitle}</h2>{group.guides.map((key,i)=>{
         const isChallenge=key==="challenge"||key==="shortcuts"||key==="profile";
         return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>{group.number}.{i+1}</span><b>{guideNames[key]}</b></button>
       })}</section>)}
@@ -417,7 +424,7 @@ export default function Home() {
             <p><strong>Funktionsweise:</strong> Führt <code>install.ps1</code> aus (HP Universal Driver PCL 6) &rarr; richtet Drucker über <code>printui.dll</code> ein (Druckername: <code>FDU</code>).</p>
           </div>
         </div>}
-        {guide==="peerSupport"&&current===3&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 Seiten</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer</small></a>}
+        {guide==="beamerAirserver"&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 SEITEN</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer im Unterrichtsraum</small></a>}
         {guide==="profile"&&current===0&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Gestaltungsvorlage herunterladen ↓</a>}
         {guide==="shortcuts"&&current===steps.length-1&&<a className="further-tasks" href="/downloads/shortcut-uebersicht-programmieren.pdf" target="_blank" rel="noreferrer">Weitere Shortcut-Aufgaben und Übersicht als PDF öffnen ↗</a>}
         {guide==="ugWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("officeMobile")}>Mit Schritt 02 weiter <span>→</span></button>}
