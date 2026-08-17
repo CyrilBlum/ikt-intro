@@ -355,7 +355,10 @@ export default function Home() {
           </div>
           <div className="peer-quick-links">
             <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_macOS.pdf" target="_blank" rel="noreferrer">
-              PDF-Anleitung öffnen ↗
+              PDF-Anleitung Drucker ↗
+            </a>
+            <a className="peer-quick-link" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer">
+              Beamer- & AirServer-Anleitung ↗
             </a>
             <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
               Pixio Web-App öffnen ↗
@@ -378,7 +381,10 @@ export default function Home() {
           </div>
           <div className="peer-quick-links">
             <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_Windows.pdf" target="_blank" rel="noreferrer">
-              PDF-Anleitung öffnen ↗
+              PDF-Anleitung Drucker ↗
+            </a>
+            <a className="peer-quick-link" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer">
+              Beamer- & AirServer-Anleitung ↗
             </a>
             <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
               Pixio Web-App öffnen ↗
