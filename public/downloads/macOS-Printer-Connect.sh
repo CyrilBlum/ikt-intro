@@ -9,8 +9,8 @@ scriptdir=$(dirname "$0")
 driverpackage="HewlettPackardPrinterDrivers.pkg"
 driver="HP Color MFP E877-40-50-60-70.gz"
 driverpath="Library/Printers/PPDs/Contents/Resources"
-read "printer_name?Name der Druckerwarteschlange (z.B. KTZH) [KTZH]: "
-printer_name="${printer_name:-KTZH}"
+read "printer_name?Name der Druckerwarteschlange (z.B. FDU) [FDU]: "
+printer_name="${printer_name:-FDU}"
 printer_displayname="${printer_name} persönlich"
 if ! [[ -f "/${driverpath}/${driver}" ]]; then
 	sudo installer -pkg "${scriptdir}/${driverpackage}" -target /
