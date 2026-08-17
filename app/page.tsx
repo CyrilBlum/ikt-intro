@@ -243,6 +243,25 @@ const pathGuides: Record<string,GuideKey> = {
   "/klp/schulkalender": "klpCalendar",
   "/klp/fobizz": "klpFobizz"
 } as Record<string,GuideKey>;
+const guideDescriptions: Record<GuideKey, string> = {
+  eduzh: "Ersteinrichtung des EduZH-Kontos und Kopplung der Microsoft Authenticator App für die Zwei-Faktor-Authentifizierung.",
+  ugWorkflow: "Ablauf der IKT-Einführung für Schüler*innen des Untergymnasiums am Schul-Computer.",
+  kgWorkflow: "Ablauf der IKT-Einführung für Schüler*innen des Kurzzeitgymnasiums und der HMS am eigenen BYOD-Gerät.",
+  officeMobile: "Installation und Konfiguration der Microsoft 365 Apps (Outlook, Teams, OneDrive) auf dem Smartphone.",
+  intranetMobile: "Einrichtung des Intranet-Zugangs (in2.tam.ch) und der IN2 Mobile App auf dem Smartphone.",
+  wlan: "Einrichtung des verschlüsselten Schul-WLANs (KTZH-S) auf Windows-PCs und MacBooks.",
+  kgIntranet: "Zugang zum Schulintranet, Stundenplan, Absenzenverwaltung und digitalen Services am Laptop.",
+  printer: "Einführung in das Drucksystem: Druckaufträge über Pixio erstellen, Badge verknüpfen und abholen.",
+  apps: "Anleitungen zur Installation der erforderlichen Schul-Software und Programme für BYOD-Geräte.",
+  profile: "Erstellung und Gestaltung des eigenen Steckbrief-Kurzprofils mit der offiziellen Word-Vorlage.",
+  challenge: "Training von Tastaturkürzeln zur schnellen Fensteranordnung (Tiling / Snap Layouts) unter Windows und macOS.",
+  shortcuts: "Interaktives Shortcut-Training für schnelles Navigieren im Browser, Dateimanager und in Editoren.",
+  peerSupport: "Installation der persönlichen Follow-Me Druckerwarteschlange (FDU) auf Windows-PCs und MacBooks zum direkten Drucken aus Programmen.",
+  beamerAirserver: "Schritt-für-Schritt Anleitung zur Bedienung der Medientechnik im Unterrichtsraum: Beamer, Audio/Video-Anlage, Monitor und drahtloser AirServer.",
+  klpCalendar: "Automatisches Abonnement des Schulkalenders in Outlook, Google Kalender oder Apple Kalender zur Synchronisation aller Termine.",
+  klpFobizz: "Erstellung digitaler Klassenräume, Verwaltung anonymer Schüler-Zugangscodes und Einsatz eigener KI-Assistenten im Unterricht."
+};
+
 const navigationGroups: { number: string; title: string; subtitle: string; path: string; guides: GuideKey[] }[] = [
   {number:"2a",title:"UG",subtitle:"Schul-Computer",path:"/ug",guides:["officeMobile","intranetMobile"]},
   {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",path:"/kg",guides:["wlan","apps","kgIntranet","printer"]},
@@ -354,15 +373,10 @@ export default function Home() {
 
         <div className="category-grid">
           {activeGrp.guides.map((key,i)=>{
-            const guideSteps=getGuideSteps(key,computer,phone);
-            const firstStep=guideSteps[0];
             return <div key={key} className="category-card" onClick={()=>openGuide(key)}>
-              <span className="category-card-number">{activeGrp.number}.{i+1} · {firstStep.phase||"Anleitung"}</span>
+              <span className="category-card-number">{activeGrp.number}.{i+1} · ANLEITUNG</span>
               <h3>{guideNames[key]}</h3>
-              <p>{firstStep.text}</p>
-              {firstStep.flow&&firstStep.flow.length>0&&<div className="category-card-tags">
-                {firstStep.flow.slice(0,3).map((f,idx)=><span key={idx} className="category-card-tag">✓ {f}</span>)}
-              </div>}
+              <p>{guideDescriptions[key]}</p>
               <button className="category-card-btn">
                 <span>Anleitung öffnen</span>
                 <span>→</span>
