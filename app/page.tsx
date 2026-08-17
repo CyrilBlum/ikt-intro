@@ -135,10 +135,17 @@ const kgWorkflow: Step[] = [
   {phase:"Kurzzeitgymnasium / HMS · Ablauf",title:"So geht es jetzt weiter",text:"Melden Sie sich auf Ihrem BYOD-Gerät in Moodle an und öffnen Sie die Aufgabenliste. Klicken Sie beim jeweiligen Auftrag auf den Link; er öffnet diese Anleitung in einem neuen Tab. Nach dem Abschluss markieren Sie die Aufgabe in Moodle als erledigt und gehen zur nächsten Aufgabe weiter.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. Verwenden Sie für die Anmeldung den Button «EduZH-Login» unterhalb der beiden Felder für Benutzername und Passwort. Falls der Kurs nach der Anmeldung nicht direkt erscheint, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung».",flow:["In Moodle anmelden und Aufgabenliste öffnen","Link im neuen Tab öffnen und Aufgabe bearbeiten","In Moodle als erledigt markieren","Nächste Aufgabe öffnen"]},
 ];
 
-const peerSupport: Step[] = [
+const peerSupportMac: Step[] = [
   {phase:"Peer-Supporter · macOS Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Dieses Skript richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem macOS-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: macOS Sonoma (14+), Internetverbindung & Admin-Rechte (sudo). Speichern Sie das Skript (.sh) und das Treiberpaket (.pkg) im selben Ordner.",shortcut:"sh + pkg",flow:["Skript (.sh) & Treiberpaket (.pkg) herunterladen","Persönliche IPP-URL aus Pixio kopieren","Skript im Terminal ausführbar machen & starten","IPP-URL einfügen & Admin-Passwort eingeben"]},
   {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
-  {phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für FDU) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"},
+  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für FDU) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"},
+  {phase:"Peer-Supporter · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
+];
+
+const peerSupportWindows: Step[] = [
+  {phase:"Peer-Supporter · Windows Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Diese Batch-Datei richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem Windows-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: Windows 10 / 11, Internetverbindung & Administrator-Rechte. Laden Sie das ZIP-Archiv herunter und entpacken Sie es vor dem Start.",shortcut:"bat + zip",flow:["ZIP-Archiv (Win-Printer-Connect.zip) herunterladen & entpacken","Persönliche IPP-URL aus Pixio kopieren","Win-Printer-Connect.bat per Doppelklick starten","IPP-URL mit Ctrl+V einfügen & Enter drücken"]},
+  {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
+  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Batch-Datei",title:"Win-Printer-Connect.bat ausführen",text:"Öffnen Sie den entpackten Ordner und führen Sie «Win-Printer-Connect.bat» aus (Rechtsklick → Als Administrator ausführen). Füge bei der Abfrage «Verbindungsname:» die kopierte IPP-URL ein und drücke Enter.",tip:"Der Drucker wird anschliessend unter dem Namen «FDU» auf Ihrem PC eingerichtet.",shortcut:"CMD"},
   {phase:"Peer-Supporter · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
 ];
 
@@ -247,11 +254,11 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="peerSupport"?peerSupport:guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
+  const steps=useMemo(()=>guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="peerSupport"?(computer==="windows"?peerSupportWindows:peerSupportMac):guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
   const step=steps[current]||steps[0];
   const image=step.image;
   const desktopAppGuide=["intranetMobile","kgIntranet","printer","klpCalendar","klpFobizz"].includes(guide);
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?"/downloads/Anleitung_BYOD_Printing_macOS.pdf":null;
+  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?`/downloads/Anleitung_BYOD_Printing_${computer==="mac"?"macOS":"Windows"}.pdf`:null;
   const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
@@ -320,14 +327,14 @@ export default function Home() {
         {(guide==="ugWorkflow"||guide==="kgWorkflow")&&<section className="workflow-launch" aria-label="Moodle starten"><div className="browser-launch"><p><strong>1. Browser öffnen</strong><span>{guide==="ugWorkflow"?"Am Schul-Computer Microsoft Edge öffnen.":"Auf Ihrem Laptop einen Browser Ihrer Wahl öffnen, z. B. Edge, Chrome oder Safari."}</span></p></div><a href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer"><b>2. Moodle öffnen</b><span>Diese Adresse eintippen:</span><code>moodle.kst-fdu.ch</code><span className="moodle-hint">Login-Hinweis: Nutzen Sie den Button «EduZH-Login» unterhalb der beiden Felder für Benutzername und Passwort.</span><span>Aufgabenliste «IKT-Einführung» ↗</span></a></section>}
         {(guide==="eduzh"&&current===0||guide==="officeMobile"&&current===0)&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
         {guide==="eduzh"&&phone==="iphone"&&step.existingImage&&<details className="alternate-path"><summary>Authenticator enthält bereits Konten?</summary><p>{step.existingText}</p><div><figure><img src={step.existingImage} alt="Im Authenticator auf das Pluszeichen tippen"/><figcaption>1. Oben rechts auf «+» tippen</figcaption></figure><figure><img src={step.existingImage2} alt="Geschäfts- oder Schulkonto und danach Anmelden wählen"/><figcaption>2. Schulkonto und «Anmelden» wählen</figcaption></figure></div></details>}
-        {(guide==="wlan"||guide==="challenge"||guide==="shortcuts")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
+        {(guide==="wlan"||guide==="challenge"||guide==="shortcuts"||guide==="peerSupport")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
         {(guide==="intranetMobile"||guide==="kgIntranet")&&(current===0||current===1)&&<a className="byod-link" href="https://in2.tam.ch" target="_blank" rel="noreferrer">Intranet öffnen (in2.tam.ch) ↗</a>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
         {guide==="printer"&&current===1&&<a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">https://pixio.triboni.net/triboni/oauth2/pix1/edu/init? ↗</a>}
-        {guide==="peerSupport"&&current===0&&<div className="peer-download-container">
+        {guide==="peerSupport"&&current===0&&computer==="mac"&&<div className="peer-download-container">
           <div className="peer-download-header">
-            <strong>Erforderliche Downloads</strong>
+            <strong>Erforderliche Downloads (macOS)</strong>
             <span>Beide Dateien vor dem Ausführen im selben Ordner speichern:</span>
           </div>
           <div className="peer-download-cards">
@@ -357,8 +364,32 @@ export default function Home() {
             </a>
           </div>
         </div>}
+        {guide==="peerSupport"&&current===0&&computer==="windows"&&<div className="peer-download-container">
+          <div className="peer-download-header">
+            <strong>Erforderliche Downloads (Windows)</strong>
+            <span>Archiv herunterladen und vor dem Start entpacken:</span>
+          </div>
+          <div className="peer-download-cards">
+            <a className="peer-dl-card zip-card" href="/downloads/Win-Printer-Connect.zip" download>
+              <div className="peer-dl-icon">📁</div>
+              <div className="peer-dl-info">
+                <span className="peer-dl-tag">ZIP-ARCHIV · 31 MB</span>
+                <strong>Win-Printer-Connect.zip</strong>
+                <small>Batch-Skript & HP Treiber für Windows ↓</small>
+              </div>
+            </a>
+          </div>
+          <div className="peer-quick-links">
+            <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_Windows.pdf" target="_blank" rel="noreferrer">
+              <span>📄</span> PDF-Anleitung öffnen ↗
+            </a>
+            <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
+              <span>🌐</span> Pixio Web-App öffnen ↗
+            </a>
+          </div>
+        </div>}
         {guide==="peerSupport"&&current===1&&<div className="peer-step-box"><a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">Pixio Web-Portal öffnen (pixio.triboni.net) ↗</a></div>}
-        {guide==="peerSupport"&&current===2&&<div className="terminal-box">
+        {guide==="peerSupport"&&current===2&&computer==="mac"&&<div className="terminal-box">
           <div className="terminal-header">
             <div className="terminal-dots"><span/><span/><span/></div>
             <span>macOS Terminal — zsh</span>
@@ -369,6 +400,18 @@ export default function Home() {
           </div>
           <div className="terminal-footer">
             <p><strong>Funktionsweise:</strong> Prüft HP-Treiber &rarr; installiert <code>HewlettPackardPrinterDrivers.pkg</code> via <code>sudo installer</code> &rarr; richtet Drucker mit <code>lpadmin</code> ein (A4, Follow-Me Finisher).</p>
+          </div>
+        </div>}
+        {guide==="peerSupport"&&current===2&&computer==="windows"&&<div className="terminal-box">
+          <div className="terminal-header">
+            <div className="terminal-dots"><span/><span/><span/></div>
+            <span>Windows Eingabeaufforderung / PowerShell</span>
+          </div>
+          <div className="terminal-body">
+            <div className="terminal-line"><span className="prompt">C:\&gt;</span> <code>Win-Printer-Connect.bat</code></div>
+          </div>
+          <div className="terminal-footer">
+            <p><strong>Funktionsweise:</strong> Führt <code>install.ps1</code> aus (HP Universal Driver PCL 6) &rarr; richtet Drucker über <code>printui.dll</code> ein (Druckername: <code>FDU</code>).</p>
           </div>
         </div>}
         {guide==="peerSupport"&&current===3&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 Seiten</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer</small></a>}
