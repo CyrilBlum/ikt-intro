@@ -12,7 +12,8 @@ from reportlab.platypus import (
 from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parents[1]
-SCREENSHOT_PATH = ROOT / "public" / "screenshots" / "printer" / "pixio-ipp-queue-01.png"
+SCREENSHOT_PATH = ROOT / "public" / "screenshots" / "printer" / "pixio-ipp-queue.png"
+TERMINAL_SCREENSHOT_PATH = ROOT / "public" / "screenshots" / "printer" / "terminal-ipp-prompt.png"
 OUTPUT_PATH_1 = ROOT / "public" / "downloads" / "Anleitung_BYOD_Printing_macOS.pdf"
 OUTPUT_PATH_2 = Path("/Users/cyrilwendl/Downloads/Druckertreiber_Mac/Anleitung_BYOD_Printing_macOS.pdf")
 
@@ -233,7 +234,20 @@ def build_pdf():
         ('VALIGN', (0,0), (-1,-1), 'TOP')
     ]))
     story.append(t)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
+
+    if TERMINAL_SCREENSHOT_PATH.exists():
+        term_img = Image(str(TERMINAL_SCREENSHOT_PATH), width=480, height=42)
+        term_table = Table([[term_img]], colWidths=[523])
+        term_table.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BOX', (0,0), (-1,-1), 1, LINE_COLOR),
+            ('PADDING', (0,0), (-1,-1), 4),
+            ('BACKGROUND', (0,0), (-1,-1), white)
+        ]))
+        story.append(term_table)
+        story.append(Spacer(1, 10))
 
     # Details
     story.append(Paragraph("Was das Skript im Detail macht", h2_style))
