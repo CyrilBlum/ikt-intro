@@ -368,7 +368,7 @@ export default function Home() {
             <span>RUBRIK {activeGrp.number}</span>
           </div>
           <h1>{activeGrp.title}</h1>
-          <p>{activeGrp.subtitle} — Alle Anleitungen dieser Kategorie in der Übersicht</p>
+          <p>{activeGrp.subtitle}</p>
         </div>
 
         <div className="category-grid">
