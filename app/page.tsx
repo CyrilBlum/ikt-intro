@@ -136,7 +136,10 @@ const kgWorkflow: Step[] = [
 ];
 
 const peerSupport: Step[] = [
-  {phase:"Peer-Supporter · Zusatzmaterial",title:"Weitere Inhalte",text:"Hier finden Sie zusätzliche Anleitungen für Ihren Einsatz als Peer-Supporter. Die PDF erklärt die wichtigsten Funktionen im Unterrichtsraum: Anlage, Quellenwahl, Projektor, Monitor und AirServer.",flow:["Beamer und AirServer bedienen"]},
+  {phase:"Peer-Supporter · macOS Druckertreiber",title:"Installation Druckerwarteschlange (KTZH)",text:"Dieses Skript richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «KTZH») auf einem macOS-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: macOS Sonoma (14+), Internetverbindung & Admin-Rechte (sudo). Speichern Sie das Skript (.sh) und das Treiberpaket (.pkg) im selben Ordner.",shortcut:"sh + pkg",flow:["Skript (.sh) & Treiberpaket (.pkg) herunterladen","Persönliche IPP-URL aus Pixio kopieren","Skript im Terminal ausführbar machen & starten","IPP-URL einfügen & Admin-Passwort eingeben"]},
+  {phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
+  {phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für KTZH) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"},
+  {phase:"Peer-Supporter · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
 ];
 
 const challengeWindows: Step[] = [
@@ -230,6 +233,7 @@ const navigationGroups: { number: string; title: string; subtitle: string; guide
   {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",guides:["wlan","apps","kgIntranet","printer"]},
   {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",guides:["profile","challenge","shortcuts"]},
   {number:"KLP",title:"Klassenlehrpersonen",subtitle:"Organisation & Unterricht",guides:["klpCalendar","klpFobizz"]},
+  {number:"PEER",title:"Peer-Supporter",subtitle:"Zusatzmaterial & Druckertreiber",guides:["peerSupport"]},
 ];
 
 export default function Home() {
@@ -307,7 +311,7 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""} ${desktopAppGuide?"desktop-app-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a,details"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className={`visual-wrap ${image?.toLowerCase().endsWith(".png")?"png-visual":""}`}>
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:step.in2Mobile?<div className="in2-visual"><small>IN2 MOBILE</small><b>App installieren</b><span>iPhone oder Android</span></div>:step.flow?<div className={`flow-visual ${guide==="ugWorkflow"?"workflow-loop ug-loop":guide==="kgWorkflow"?"workflow-loop kg-loop":""}`}><small>START-ABLAUF</small>{step.flow.map((item,index)=>{const repeats=guide==="ugWorkflow"?index>=2:guide==="kgWorkflow"?index>=1:false;const startsRepeat=guide==="ugWorkflow"?index===2:guide==="kgWorkflow"?index===1:false;return <div key={item} className={repeats?"repeat-step":""}>{startsRepeat&&<em>Für jede weitere Aufgabe</em>}<span>{String(index+1).padStart(2,"0")}</span><b>{item}{guide==="kgWorkflow"&&index===3&&<> <u>in Moodle</u></>}</b>{index<step.flow!.length-1&&<i>↓</i>}</div>})}{guide==="ugWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 03 beginnen</p>}{guide==="kgWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 02 beginnen</p>}</div>:<div className="challenge-card"><small>{guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:step.in2Mobile?<div className="in2-visual"><small>IN2 MOBILE</small><b>App installieren</b><span>iPhone oder Android</span></div>:step.flow?<div className={`flow-visual ${guide==="ugWorkflow"?"workflow-loop ug-loop":guide==="kgWorkflow"?"workflow-loop kg-loop":""}`}><small>{guide==="peerSupport"?"ABLAUF · ANLEITUNG":"START-ABLAUF"}</small>{step.flow.map((item,index)=>{const repeats=guide==="ugWorkflow"?index>=2:guide==="kgWorkflow"?index>=1:false;const startsRepeat=guide==="ugWorkflow"?index===2:guide==="kgWorkflow"?index===1:false;return <div key={item} className={repeats?"repeat-step":""}>{startsRepeat&&<em>Für jede weitere Aufgabe</em>}<span>{String(index+1).padStart(2,"0")}</span><b>{item}{guide==="kgWorkflow"&&index===3&&<> <u>in Moodle</u></>}</b>{index<step.flow!.length-1&&<i>↓</i>}</div>})}{guide==="ugWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 03 beginnen</p>}{guide==="kgWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 02 beginnen</p>}</div>:<div className="challenge-card"><small>{guide==="peerSupport"?"PEER-SUPPORTER":guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":guide==="peerSupport"?"PEER-SUPPORTER · MACOS PRINT":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
@@ -321,7 +325,53 @@ export default function Home() {
         {(guide==="intranetMobile"||guide==="kgIntranet")&&(current===0||current===1)&&<a className="byod-link" href="https://in2.tam.ch" target="_blank" rel="noreferrer">Intranet öffnen (in2.tam.ch) ↗</a>}
         {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
         {guide==="printer"&&current===1&&<a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">https://pixio.triboni.net/triboni/oauth2/pix1/edu/init? ↗</a>}
-        {guide==="peerSupport"&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 Seiten</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer</small></a>}
+        {guide==="peerSupport"&&current===0&&<div className="peer-download-container">
+          <div className="peer-download-header">
+            <strong>Erforderliche Downloads</strong>
+            <span>Beide Dateien vor dem Ausführen im selben Ordner speichern:</span>
+          </div>
+          <div className="peer-download-cards">
+            <a className="peer-dl-card sh-card" href="/downloads/macOS-Printer-Connect.sh" download>
+              <div className="peer-dl-icon">📜</div>
+              <div className="peer-dl-info">
+                <span className="peer-dl-tag">SHELL-SKRIPT · 1.4 KB</span>
+                <strong>macOS-Printer-Connect.sh</strong>
+                <small>Einrichtungsskript für Terminal ↓</small>
+              </div>
+            </a>
+            <a className="peer-dl-card pkg-card" href="/downloads/HewlettPackardPrinterDrivers.pkg" download>
+              <div className="peer-dl-icon">📦</div>
+              <div className="peer-dl-info">
+                <span className="peer-dl-tag">TREIBERPAKET · 263 MB</span>
+                <strong>HewlettPackardPrinterDrivers.pkg</strong>
+                <small>HP Druckertreiber für macOS ↓</small>
+              </div>
+            </a>
+          </div>
+          <div className="peer-quick-links">
+            <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_macOS.pdf" target="_blank" rel="noreferrer">
+              <span>📄</span> PDF-Anleitung öffnen ↗
+            </a>
+            <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
+              <span>🌐</span> Pixio Web-App öffnen ↗
+            </a>
+          </div>
+        </div>}
+        {guide==="peerSupport"&&current===1&&<div className="peer-step-box"><a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">Pixio Web-Portal öffnen (pixio.triboni.net) ↗</a></div>}
+        {guide==="peerSupport"&&current===2&&<div className="terminal-box">
+          <div className="terminal-header">
+            <div className="terminal-dots"><span/><span/><span/></div>
+            <span>macOS Terminal — zsh</span>
+          </div>
+          <div className="terminal-body">
+            <div className="terminal-line"><span className="prompt">$</span> <code>chmod +x macOS-Printer-Connect.sh</code></div>
+            <div className="terminal-line"><span className="prompt">$</span> <code>./macOS-Printer-Connect.sh</code></div>
+          </div>
+          <div className="terminal-footer">
+            <p><strong>Funktionsweise:</strong> Prüft HP-Treiber &rarr; installiert <code>HewlettPackardPrinterDrivers.pkg</code> via <code>sudo installer</code> &rarr; richtet Drucker mit <code>lpadmin</code> ein (A4, Follow-Me Finisher).</p>
+          </div>
+        </div>}
+        {guide==="peerSupport"&&current===3&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 Seiten</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer</small></a>}
         {guide==="profile"&&current===0&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Gestaltungsvorlage herunterladen ↓</a>}
         {guide==="shortcuts"&&current===steps.length-1&&<a className="further-tasks" href="/downloads/shortcut-uebersicht-programmieren.pdf" target="_blank" rel="noreferrer">Weitere Shortcut-Aufgaben und Übersicht als PDF öffnen ↗</a>}
         {guide==="ugWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("officeMobile")}>Mit Schritt 02 weiter <span>→</span></button>}
