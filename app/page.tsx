@@ -243,15 +243,38 @@ const pathGuides: Record<string,GuideKey> = {
   "/klp/schulkalender": "klpCalendar",
   "/klp/fobizz": "klpFobizz"
 } as Record<string,GuideKey>;
-const navigationGroups: { number: string; title: string; subtitle: string; guides: GuideKey[] }[] = [
-  {number:"2a",title:"UG",subtitle:"Schul-Computer",guides:["officeMobile","intranetMobile"]},
-  {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",guides:["wlan","apps","kgIntranet","printer"]},
-  {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",guides:["profile","challenge","shortcuts"]},
-  {number:"LP",title:"Lehrpersonen",subtitle:"Organisation & Medientechnik",guides:["klpCalendar","klpFobizz","peerSupport","beamerAirserver"]},
+const navigationGroups: { number: string; title: string; subtitle: string; path: string; guides: GuideKey[] }[] = [
+  {number:"2a",title:"UG",subtitle:"Schul-Computer",path:"/ug",guides:["officeMobile","intranetMobile"]},
+  {number:"2b",title:"KG / HMS",subtitle:"eigene BYOD-Geräte",path:"/kg",guides:["wlan","apps","kgIntranet","printer"]},
+  {number:"3",title:"Challenges",subtitle:"für alle Schulstufen",path:"/challenges",guides:["profile","challenge","shortcuts"]},
+  {number:"LP",title:"Lehrpersonen",subtitle:"Organisation & Medientechnik",path:"/lehrpersonen",guides:["klpCalendar","klpFobizz","peerSupport","beamerAirserver"]},
 ];
+
+function getGuideSteps(key: GuideKey, computer: "windows" | "mac", phone: "iphone" | "android"): Step[] {
+  switch (key) {
+    case "eduzh": return phone === "android" ? eduzhAndroid : eduzhIphone;
+    case "ugWorkflow": return ugWorkflow;
+    case "kgWorkflow": return kgWorkflow;
+    case "officeMobile": return phone === "android" ? officeMobileAndroid : officeMobileIphone;
+    case "intranetMobile": return intranetMobile;
+    case "kgIntranet": return kgIntranet;
+    case "printer": return printer;
+    case "apps": return apps;
+    case "beamerAirserver": return beamerAirserver;
+    case "peerSupport": return computer === "windows" ? peerSupportWindows : peerSupportMac;
+    case "profile": return profile;
+    case "klpCalendar": return klpCalendar;
+    case "klpFobizz": return klpFobizz;
+    case "wlan": return computer === "windows" ? wlanWindows : wlanMac;
+    case "challenge": return computer === "windows" ? challengeWindows : challengeMac;
+    case "shortcuts": return computer === "windows" ? shortcutsWindows : shortcutsMac;
+    default: return eduzhIphone;
+  }
+}
 
 export default function Home() {
   const [intro,setIntro]=useState(true);
+  const [categoryGroup,setCategoryGroup]=useState<string|null>(null);
   const [guide,setGuide]=useState<GuideKey>("eduzh");
   const [current,setCurrent]=useState(0);
   const [phone,setPhone]=useState<"iphone"|"android">("iphone");
@@ -266,12 +289,13 @@ export default function Home() {
   const image=step.image;
   const desktopAppGuide=["intranetMobile","kgIntranet","printer","klpCalendar","klpFobizz","beamerAirserver"].includes(guide);
   const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?`/downloads/Anleitung_BYOD_Printing_${computer==="mac"?"macOS":"Windows"}.pdf`:guide==="beamerAirserver"?"/downloads/anleitung-beamer-unterrichtsraum.pdf":null;
-  const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
+  const openCategoryGroup=(path:string,updateUrl=true)=>{const grp=navigationGroups.find(g=>g.path===path||g.path===path.replace(/\/$/,""));if(grp){setIntro(false);setCategoryGroup(grp.number);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",grp.path);window.scrollTo({top:0,behavior:"smooth"});}};
+  const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setCategoryGroup(null);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
   useEffect(()=>{setCurrent(0)},[computer]);
   useEffect(()=>{const timer=window.setTimeout(()=>setHeaderHidden(true),3600);return()=>window.clearTimeout(timer)},[]);
-  useEffect(()=>{const applyPath=()=>{const key=pathGuides[window.location.pathname.replace(/\/$/,"")||"/"];if(key)openGuide(key,false);else setIntro(true)};applyPath();window.addEventListener("popstate",applyPath);return()=>window.removeEventListener("popstate",applyPath)},[]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setQrOpen(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,steps.length]);
+  useEffect(()=>{const applyPath=()=>{const rawPath=window.location.pathname;const cleanPath=rawPath.replace(/\/$/,"")||"/";const grp=navigationGroups.find(g=>g.path===cleanPath||g.path+"/"===rawPath);if(grp){openCategoryGroup(grp.path,false);return;}const key=pathGuides[cleanPath];if(key){openGuide(key,false);return;}setIntro(true);setCategoryGroup(null);};applyPath();window.addEventListener("popstate",applyPath);return()=>window.removeEventListener("popstate",applyPath)},[]);
+  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(!intro&&!categoryGroup&&e.key==="ArrowRight")setCurrent(n=>Math.min(n+1,steps.length-1));if(!intro&&!categoryGroup&&e.key==="ArrowLeft")setCurrent(n=>Math.max(n-1,0));if(e.key==="Escape"){setZoom(false);setQrOpen(false);setMenu(false)}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[intro,categoryGroup,steps.length]);
   const finishSwipe=(event:React.PointerEvent)=>{
     if(!swipeStart.current)return;
     const dx=event.clientX-swipeStart.current.x,dy=event.clientY-swipeStart.current.y;
@@ -289,17 +313,17 @@ export default function Home() {
     <aside className={`drawer ${menu?"open":""}`} aria-hidden={!menu}>
       <button className="drawer-close" onClick={()=>setMenu(false)} aria-label="Menü schliessen">×</button>
       <small>IKT-EINFÜHRUNG</small><h1>Was möchten Sie einrichten?</h1>
-      <button className={intro?"active":""} onClick={()=>{setIntro(true);setMenu(false);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
-      <button className={!intro&&guide==="eduzh"?"active":""} onClick={()=>openGuide("eduzh")}><span>01</span><b>EduZH-Erstlogin</b></button>
-      {navigationGroups.map(group=><section className={`nav-group group-${group.number.toLowerCase()}`} key={group.title}><h2><span>{group.number}</span><b>{group.title}</b>{group.subtitle}</h2>{group.guides.map((key,i)=>{
+      <button className={intro?"active":""} onClick={()=>{setIntro(true);setCategoryGroup(null);setMenu(false);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}><span>00</span><b>Startseite</b></button>
+      <button className={!intro&&!categoryGroup&&guide==="eduzh"?"active":""} onClick={()=>openGuide("eduzh")}><span>01</span><b>EduZH-Erstlogin</b></button>
+      {navigationGroups.map(group=><section className={`nav-group group-${group.number.toLowerCase()}`} key={group.title}><h2 className={`clickable-category-header ${!intro&&categoryGroup===group.number?"active":""}`} onClick={()=>openCategoryGroup(group.path)} title={`${group.title} Übersicht öffnen`}><span>{group.number}</span><b>{group.title} ↗</b></h2>{group.guides.map((key,i)=>{
         const isChallenge=key==="challenge"||key==="shortcuts"||key==="profile";
-        return <button key={key} className={`${!intro&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>{group.number}.{i+1}</span><b>{guideNames[key]}</b></button>
+        return <button key={key} className={`${!intro&&!categoryGroup&&guide===key?"active":""} ${isChallenge?"challenge-entry":""}`} onClick={()=>openGuide(key)}><span>{group.number}.{i+1}</span><b>{guideNames[key]}</b></button>
       })}</section>)}
       <a href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Software & weitere Anleitungen ↗</a>
       <section className="drawer-about" aria-labelledby="about-title">
         <small id="about-title">ÜBER DIESE SEITE</small>
         <p>Erstellt von <strong>Cyril Blum</strong></p>
-        <div><a href="https://cblum.ch/" target="_blank" rel="noreferrer">cblum.ch ↗</a><a href="https://github.com/CyrilBlum/ikt-intro" target="_blank" rel="noreferrer">GitHub-Repository ↗</a><a href={guidePaths.peerSupport} onClick={event=>{event.preventDefault();openGuide("peerSupport")}}>Peer-Supporter ↗</a></div>
+        <div><a href="https://cblum.ch/" target="_blank" rel="noreferrer">cblum.ch ↗</a><a href="https://github.com/CyrilBlum/ikt-intro" target="_blank" rel="noreferrer">GitHub-Repository ↗</a><a href={guidePaths.peerSupport} onClick={event=>{event.preventDefault();openGuide("peerSupport")}}>Drucker-BYOD ↗</a></div>
       </section>
     </aside>
 
@@ -317,7 +341,41 @@ export default function Home() {
         <div><strong>Kein mobiles Internet?</strong><p>Scannen Sie diesen QR-Code, um sich zuerst mit dem bereitgestellten WLAN zu verbinden.</p><button onClick={()=>setQrOpen(true)}>Beide QR-Codes gross anzeigen</button></div>
       </aside>
       <p className="intro-menu-hint">Alle Anleitungen finden Sie über das Menü oben links.</p>
-    </section>:<>
+    </section>:categoryGroup!==null?(()=>{
+      const activeGrp=navigationGroups.find(g=>g.number===categoryGroup)||navigationGroups[0];
+      return <div className="category-overview" id="top">
+        <div className="category-header">
+          <div className={`category-badge badge-${activeGrp.number.toLowerCase()}`}>
+            <span>RUBRIK {activeGrp.number}</span>
+          </div>
+          <h1>{activeGrp.title}</h1>
+          <p>{activeGrp.subtitle} — Alle Anleitungen dieser Kategorie in der Übersicht</p>
+        </div>
+
+        <div className="category-grid">
+          {activeGrp.guides.map((key,i)=>{
+            const guideSteps=getGuideSteps(key,computer,phone);
+            const firstStep=guideSteps[0];
+            return <div key={key} className="category-card" onClick={()=>openGuide(key)}>
+              <span className="category-card-number">{activeGrp.number}.{i+1} · {firstStep.phase||"Anleitung"}</span>
+              <h3>{guideNames[key]}</h3>
+              <p>{firstStep.text}</p>
+              {firstStep.flow&&firstStep.flow.length>0&&<div className="category-card-tags">
+                {firstStep.flow.slice(0,3).map((f,idx)=><span key={idx} className="category-card-tag">✓ {f}</span>)}
+              </div>}
+              <button className="category-card-btn">
+                <span>Anleitung öffnen</span>
+                <span>→</span>
+              </button>
+            </div>
+          })}
+        </div>
+
+        <button className="category-back-btn" onClick={()=>{setIntro(true);setCategoryGroup(null);window.history.pushState({},"","/");window.scrollTo({top:0,behavior:"smooth"})}}>
+          <span>←</span> Zurück zur Startseite
+        </button>
+      </div>
+    })():<>
     <nav className="progress" aria-label="Fortschritt">
       <div className="progress-copy"><span>{guideNames[guide]}</span><strong>{current+1} / {steps.length}</strong></div>
       <div className="bar"><i style={{width:`${((current+1)/steps.length)*100}%`}}/></div>
