@@ -357,7 +357,20 @@ export default function Home() {
       </div>
       <aside className="wifi-card">
         <img src="/wifi.svg" alt="QR-Code für das WLAN"/>
-        <div><strong>Kein mobiles Internet?</strong><p>Scannen Sie diesen QR-Code, um sich zuerst mit dem bereitgestellten WLAN zu verbinden.</p><button onClick={()=>setQrOpen(true)}>Beide QR-Codes gross anzeigen</button></div>
+        <div>
+          <strong>WLAN &amp; Einstieg wählen</strong>
+          <div className="wifi-branch-mini">
+            <div className="wifi-case case-laptop">
+              <span className="case-badge">FALL 1 · AUTHENTICATOR BEREITS BEREIT</span>
+              <p>💻 <strong>Zuerst am Laptop:</strong> Zuerst mit WLAN <code>KTZH-S</code> verbinden (Schulaccount <code>vorname.nachname@stud.edu.zh.ch</code> + Passwort). <em>Erst danach</em> <code>ikt.in-form-atik.ch</code> auf dem Laptop öffnen.</p>
+            </div>
+            <div className="wifi-case case-mobile">
+              <span className="case-badge">FALL 2 · ERSTLOGIN</span>
+              <p>📱 <strong>Am Handy:</strong> Zuerst mit <code>KTZH-Schulstart</code> oder mobilem Netz verbinden, <em>danach</em> <code>ikt.in-form-atik.ch</code> auf dem Handy öffnen – oder direkt mit der ausgedruckten Papier-Anleitung arbeiten.</p>
+            </div>
+          </div>
+          <button onClick={()=>setQrOpen(true)}>🔍 Beide QR-Codes gross anzeigen</button>
+        </div>
       </aside>
       <p className="intro-menu-hint">Alle Anleitungen finden Sie über das Menü oben links.</p>
     </section>:categoryGroup!==null?(()=>{
@@ -515,9 +528,32 @@ export default function Home() {
     {zoom&&image&&<div className="lightbox" role="dialog" aria-modal="true" onClick={()=>setZoom(false)}><button aria-label="Schliessen">×</button><img src={image} alt=""/></div>}
     {qrOpen&&<div className="qr-lightbox" role="dialog" aria-modal="true" aria-label="QR-Codes für WLAN und IKT-Webseite" onClick={()=>setQrOpen(false)}>
       <button className="qr-close" aria-label="QR-Codes schliessen">×</button>
-      <div className="qr-stage" onClick={e=>e.stopPropagation()}>
-        <article><span>01</span><h2>WLAN verbinden</h2><img src="/wifi.svg" alt="QR-Code für das bereitgestellte WLAN"/><div className="qr-details"><p><strong>SSID:</strong> <code>KTZH-Schulstart</code></p><p><strong>Passwort (PSK):</strong> <code>*Schul$t@rt_2026!%</code></p></div></article>
-        <article><span>02</span><h2>Anleitung öffnen</h2><img src="/ikt-in-form-atik-ch.svg" alt="QR-Code für ikt.in-form-atik.ch"/><div className="qr-details"><p><strong>URL:</strong></p><p><a href="https://ikt.in-form-atik.ch/">https://ikt.in-form-atik.ch</a></p></div></article>
+      <div className="qr-stage-wrap" onClick={e=>e.stopPropagation()}>
+        <div className="qr-branch-header">
+          <div className="qr-branch-card branch-laptop">
+            <div className="card-header-badge">FALL 1 · AUTHENTICATOR BEREITS EINGERICHTET</div>
+            <h3>💻 Auf dem Laptop arbeiten</h3>
+            <ol className="branch-steps">
+              <li><strong>1. Zuerst WLAN verbinden:</strong> Verbinden Sie Ihren Laptop zuerst mit dem Schul-WLAN <code>KTZH-S</code> (Login: <code>vorname.nachname@stud.edu.zh.ch</code> + Passwort).</li>
+              <li><strong>2. Erst danach Webseite öffnen:</strong> Sobald KTZH-S verbunden ist, öffnen Sie im Browser auf dem Laptop <code>ikt.in-form-atik.ch</code>.</li>
+            </ol>
+          </div>
+
+          <div className="qr-branch-card branch-mobile">
+            <div className="card-header-badge">FALL 2 · ERSTLOGIN / NEUES GERÄT</div>
+            <h3>📱 Auf dem Handy (oder mit Papier-Anleitung)</h3>
+            <ol className="branch-steps">
+              <li><strong>1. Zuerst WLAN verbinden:</strong> Smartphone zuerst mit WLAN <code>KTZH-Schulstart</code> (QR-Code 01 unten) oder mobilem Netz verbinden.</li>
+              <li><strong>2. Erst danach Webseite öffnen:</strong> Scannen Sie QR-Code 02 unten, um <code>ikt.in-form-atik.ch</code> auf dem Handy zu öffnen.</li>
+            </ol>
+            <p className="paper-hint">📄 <em>Alternativ: Sie können für die Ersteinrichtung auch direkt mit der ausgedruckten Papier-Anleitung arbeiten.</em></p>
+          </div>
+        </div>
+
+        <div className="qr-stage">
+          <article><span>01</span><h2>Temporäres WLAN (Erstlogin)</h2><img src="/wifi.svg" alt="QR-Code für das bereitgestellte WLAN KTZH-Schulstart"/><div className="qr-details"><p><strong>SSID:</strong> <code>KTZH-Schulstart</code></p><p><strong>Passwort (PSK):</strong> <code>*Schul$t@rt_2026!%</code></p></div></article>
+          <article><span>02</span><h2>Anleitung auf dem Handy öffnen</h2><img src="/ikt-in-form-atik-ch.svg" alt="QR-Code für ikt.in-form-atik.ch"/><div className="qr-details"><p><strong>URL:</strong></p><p><a href="https://ikt.in-form-atik.ch/">https://ikt.in-form-atik.ch</a></p></div></article>
+        </div>
       </div>
     </div>}
   </main>;

@@ -66,8 +66,8 @@ def draw_next_steps(c, page_no, total, platform):
     c.drawString(12*mm, h-42*mm, "Wähle den Weg, der zu deiner Abteilung gehört.")
 
     cards = [
-        ("UNTERGYMNASIUM", "Auf dem Schullaptop weitermachen", 172*mm, 67*mm),
-        ("KURZZEITGYMNASIUM / HMS", "Mit dem eigenen Laptop weitermachen", 72*mm, 88*mm),
+        ("UNTERGYMNASIUM", "Auf dem Schullaptop weitermachen", 162*mm, 78*mm),
+        ("KURZZEITGYMNASIUM / HMS", "Mit dem eigenen Laptop weitermachen", 70*mm, 87*mm),
     ]
     card_x, card_w = 12*mm, w-24*mm
 
@@ -94,20 +94,23 @@ def draw_next_steps(c, page_no, total, platform):
         if index == 0:
             ug_steps = [
                 "1. Melde dich am Schullaptop an.",
-                "2. Öffne Microsoft Edge.",
-                "3. Öffne den Moodle-Kurs «IKT-Einführung».",
+                "2. Verbinde den Schullaptop mit dem Schul-WLAN «KTZH-S».",
+                "3. Öffne die EduZH-Anleitung und wähle am Schluss «Untergymnasium».",
+                "4. Öffne danach den Moodle-Kurs «IKT-Einführung».",
             ]
             for step_index, step in enumerate(ug_steps):
                 c.drawString(card_x+5*mm, card_top-(29 + step_index*5.7)*mm, step)
-            draw_written_link("AUF DEM SCHULLAPTOP", moodle_url, card_top-54*mm)
+            draw_written_link("AUF DEM SCHULLAPTOP", moodle_url, card_top-65*mm)
         else:
-            c.drawString(card_x+5*mm, card_top-29*mm, "1. Melde dich auf deinem eigenen Laptop an.")
-            c.drawString(card_x+5*mm, card_top-35*mm, "2. Öffne auf deinem Handy die WLAN-Anleitung.")
-            draw_written_link("AUF DEM HANDY", wlan_url, card_top-49.5*mm)
-            c.setFillColor(INK); c.setFont("Helvetica", 8.8)
-            c.drawString(card_x+5*mm, card_top-59*mm, "3. Verbinde den Laptop gemäss Anleitung mit «KTZH-S».")
-            c.drawString(card_x+5*mm, card_top-65*mm, "4. Öffne danach Moodle auf deinem Laptop.")
-            draw_written_link("AUF DEM LAPTOP", moodle_url, card_top-79*mm)
+            kg_steps = [
+                "1. Melde dich auf deinem eigenen Laptop an.",
+                "2. Verbinde den Laptop mit dem Schul-WLAN «KTZH-S» (EduZH-Konto).",
+                "3. Öffne die EduZH-Anleitung & wähle am Schluss «Kurzzeitgymnasium / HMS».",
+                "4. Öffne danach den Moodle-Kurs «IKT-Einführung».",
+            ]
+            for step_index, step in enumerate(kg_steps):
+                c.drawString(card_x+5*mm, card_top-(29 + step_index*5.7)*mm, step)
+            draw_written_link("AUF DEM LAPTOP", moodle_url, card_top-65*mm)
 
     draw_footer(c, page_no, total)
 
