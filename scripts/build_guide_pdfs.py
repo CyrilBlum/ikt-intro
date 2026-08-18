@@ -213,6 +213,7 @@ def main():
     made=[]
     made.append(make_pdf("eduzh-iphone.pdf","EduZH-Erstlogin",parse_steps("eduzhIphone"),"image","iPhone"))
     made.append(make_pdf("eduzh-android.pdf","EduZH-Erstlogin",parse_steps("eduzhAndroid"),"image","Android"))
+    made.append(make_pdf("eduzh-ohne-handy.pdf","EduZH-Erstlogin (ohne Smartphone)",parse_steps("eduzhNoPhone"),"image","USB-Key / FIDO2"))
     made.append(make_pdf("wlan-windows.pdf","WLAN mit KTZH-S verbinden",parse_steps("wlanWindows"),platform="Windows"))
     made.append(make_pdf("wlan-macos.pdf","WLAN mit KTZH-S verbinden",parse_steps("wlanMac"),platform="macOS"))
     made.append(make_pdf("microsoft-365.pdf","Teams, Outlook & OneDrive",parse_steps("apps"),platform="BYOD"))
