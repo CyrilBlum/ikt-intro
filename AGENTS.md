@@ -44,6 +44,10 @@ Projektwissen für Agents. Gilt zusätzlich zu den globalen Anweisungen.
   «Semester»), «Absenzen meiner Klassen (FLP)», «Absenzen meiner Klasse (KLP)»,
   «Wochenübersicht», «Semesterübersicht» («i» → Status x/e/u/S je Lektion),
   «Jokertage meiner Schüler KLP», «Disp/Jokertage meiner Klassen KLP».
+  «Absenzen-Admin» (wichtigste KLP-Ansicht): Person aufklappen, Lektionen
+  anhaken → «Bearbeiten» → «Einträge anpassen» (Typ: Abwesend / Abwesend
+  (disp. Schule); Status: abwesend / entschuldigt / unentschuldigt / «2»?) →
+  «Update». Dokument-Symbol = «Eintrag kommentieren».
   «Stundenplan» → «Unbestätigte Lektionen».
 - Spaltenkürzel: X offen, XE entschuldigt, XU unentschuldigt, V/VE/VU
   Verspätung, J Jokertag, D Dispensation, S Absenz Schule (schulische
