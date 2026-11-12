@@ -113,7 +113,9 @@ Quelle: Reglement zu Absenzen, Dispensation und Jokertagen, FDU, 8. Mai 2026
   in der App IN2 Mobile.
 - Klick auf Schüler*in in «Absenzen meiner Klasse (KLP)» → «Die Daten konnten
   nicht geladen werden»: bekannter Fehler, Ticket beim DSC-ServicePortal.
-- Entschuldigungsformular für SuS: SharePoint
-  https://eduzh.sharepoint.com/sites/bi-mba-2250-su
+- Entschuldigungsformular für SuS: PDF `06_Formulare/Absenzenentschuldigung.pdf`
+  auf SharePoint https://eduzh.sharepoint.com/sites/bi-mba-2250-su, seit
+  12.11.2026 auch im Intranet-Dashboard unter «Meine Links» → «Absenzenformular»
+  (Link-ID 281, Typ `dashboard:mylinks`).
 - KLP bewilligen Dispensationsgesuche ≤ 1 Tag über den Link in einer
   automatisch generierten E-Mail.
