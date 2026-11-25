@@ -1,304 +1,37 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import defaultContent from "./content.json";
 
-type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; flow?: string[]; in2Mobile?: boolean; existingImage?: string; existingImage2?: string; existingText?: string; legend?: [string, string][]; legendHead?: [string, string] };
+type GuideLink = { style?: "link" | "pdf" | "download" | "further" | "next"; label: string; href?: string; guide?: string; tag?: string; note?: string; boxed?: boolean };
+type Step = { image?: string; phase: string; title: string; text: string; tip?: string; shortcut?: string; flow?: string[]; in2Mobile?: boolean; existingImage?: string; existingImage2?: string; existingText?: string; existingSummary?: string; existingCaption1?: string; existingCaption2?: string; legend?: [string, string][]; legendHead?: [string, string];
+  links?: GuideLink[];
+  callout?: { title?: string; text?: string; label?: string; href?: string; guide?: string };
+  box?: { title?: string; code?: string; text?: string };
+  launch?: { browserTitle?: string; browserText?: string; title?: string; intro?: string; code?: string; hint?: string; label?: string; href: string };
+  downloads?: { title?: string; text?: string; items: { kind?: string; tag?: string; name: string; note?: string; href: string }[]; links?: { label: string; href: string }[] };
+  terminal?: { title?: string; lines: { prompt?: string; code: string }[]; noteTitle?: string; note?: string };
+};
+type Visual = { flowLabel?: string; loop?: string; repeatFrom?: number; repeatTitle?: string; repeatNote?: string; cardLabel?: string; cardFooter?: string };
+type Finish = { success?: string; title?: string; choices?: { label: string; guide: string }[]; moodle?: { label: string; href: string; text?: string } };
 type GuideKey = "eduzh" | "eduzhNoPhone" | "ugWorkflow" | "kgWorkflow" | "officeMobile" | "intranetMobile" | "wlan" | "kgIntranet" | "printer" | "apps" | "challenge" | "shortcuts" | "profile" | "peerSupport" | "beamerAirserver" | "klpCalendar" | "klpFobizz" | "absSick" | "absJoker" | "absDisp" | "lpAttendance" | "klpAbsences" | "klpDisp";
+type Content = { version: number; guides: Record<string, { name: string; description: string }>; lists: Record<string, { label: string; steps: Step[]; pdf?: string; finish?: Finish; visual?: Visual }> };
+type Lists = Record<string, Step[]>;
 
-const eduzhIphone: Step[] = [
-  {image:"/screenshots/appstore-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den App Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr iPhone – noch keinen Computer."},
-  {image:"/screenshots/appstore-02-laden.jpg",phase:"Gerät wählen",title:"Welches Smartphone verwenden Sie?",text:"Wählen Sie Ihr Gerät aus. Die nächsten Screenshots passen sich automatisch an. Laden Sie danach «Microsoft Authenticator» und öffnen Sie die App."},
-  {image:"/screenshots/appstore-03-annehmen.jpg",phase:"Vorbereiten",title:"Datenschutzbestimmungen annehmen",text:"Lesen Sie den Hinweis zu den erforderlichen Diagnosedaten und tippen Sie auf «Annehmen»."},
-  {image:"/screenshots/appstore-04-weiter.jpg",phase:"Vorbereiten",title:"Einführung fortsetzen",text:"Die freiwillige Freigabe zusätzlicher Nutzungsdaten können Sie ausgeschaltet lassen. Tippen Sie unten auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-05-school-or-university-account.png",existingImage:"/screenshots/eduzh-v2/iphone-05-existing-01-plus.jpg",existingImage2:"/screenshots/eduzh-v2/iphone-05-existing-02-school-account.jpg",existingText:"Falls im Authenticator bereits andere Konten eingerichtet sind: Tippen Sie oben rechts auf «+», wählen Sie «Geschäfts- oder Schulkonto» und danach «Anmelden».",phase:"Konto hinzufügen",title:"Geschäfts-, Schul- oder Unikonto hinzufügen",text:"Tippen Sie auf «Geschäfts-, Schul- oder Unikonto hinzufügen» – nicht auf «Bei Microsoft anmelden».",tip:"Falls bereits Konten eingerichtet sind: Tippen Sie oben rechts auf «+», wählen Sie «Geschäfts- oder Schulkonto» und danach «Anmelden». Auf der Webseite finden Sie dazu zwei ausklappbare Screenshots."},
-  {image:"/screenshots/eduzh-v2/iphone-06-email.jpg",phase:"Anmelden",title:"EduZH-Adresse eingeben",text:"Geben Sie Ihre vollständige EduZH-Adresse ein und tippen Sie auf «Weiter».",tip:"Die Adresse endet auf @stud.edu.zh.ch."},
-  {image:"/screenshots/eduzh-v2/iphone-07-start-password.jpg",phase:"Anmelden",title:"Startkennwort eingeben",text:"Geben Sie das Startkennwort ein, das Sie von der Schule erhalten haben, und tippen Sie auf «Anmelden»."},
-  {image:"/screenshots/eduzh-v2/iphone-08-open-browser.jpg",phase:"Browser",title:"Einrichtung im Browser fortsetzen",text:"Der Authenticator verlangt für die weitere Einrichtung einen Webbrowser. Tippen Sie auf «Browser öffnen»."},
-  {image:"/screenshots/eduzh-v2/iphone-09-select-account.jpg",phase:"Browser",title:"EduZH-Konto auswählen",text:"Wählen Sie Ihr EduZH-Konto aus. Falls es nicht angezeigt wird, tippen Sie auf «Anderes Konto verwenden» und melden Sie sich mit Ihrer EduZH-Adresse an."},
-  {image:"/screenshots/eduzh-v2/iphone-10-protect-account.jpg",phase:"Sicherheit",title:"Kontoschutz starten",text:"Microsoft führt Sie durch die Einrichtung der Sicherheitsmethoden. Tippen Sie auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-11-authenticator-ready.jpg",phase:"Authenticator",title:"Installierte App bestätigen",text:"Microsoft fordert Sie zum Installieren des Authenticators auf. Da Sie die App bereits installiert haben, tippen Sie einfach auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-12-link-account.jpg",phase:"Authenticator",title:"Konto mit der App koppeln",text:"Tippen Sie auf den blauen Link «Koppeln Sie Ihr Konto mit der App, indem Sie auf diesen Link klicken». Der Authenticator öffnet sich automatisch."},
-  {image:"/screenshots/eduzh-v2/iphone-13-account-added.jpg",phase:"Authenticator",title:"Konto wurde hinzugefügt",text:"Bestätigen Sie die Meldung mit «OK». Tippen Sie danach oben links auf «Safari», um in den Browser zurückzukehren."},
-  {image:"/screenshots/eduzh-v2/iphone-14-continue-pairing.jpg",phase:"Authenticator",title:"Kopplung im Browser abschliessen",text:"Sie sind wieder im Browser. Tippen Sie nun auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-15-number-test.jpg",phase:"Test",title:"Anmeldung testen",text:"Im Browser erscheint eine zweistellige Zahl. Öffnen Sie den Authenticator und merken Sie sich die angezeigte Zahl."},
-  {image:"/screenshots/eduzh-v2/iphone-16-approve-number.jpg",phase:"Test",title:"Zahl eingeben und bestätigen",text:"Geben Sie im Authenticator die Zahl aus dem Browser ein und tippen Sie auf «Ja». Wechseln Sie danach wieder zurück zu Safari."},
-  {image:"/screenshots/eduzh-v2/iphone-17-authenticator-added.jpg",phase:"Authenticator",title:"Authenticator abschliessen",text:"Der Authenticator wurde erfolgreich hinzugefügt und ist jetzt die Standardmethode. Tippen Sie auf «Fertig»."},
-  {image:"/screenshots/eduzh-v2/iphone-18-phone-number.jpg",phase:"Telefon",title:"Telefonnummer hinzufügen",text:"Wählen Sie «Switzerland (+41)», geben Sie Ihre Mobilnummer ein und lassen Sie sich einen Code per SMS senden."},
-  {image:"/screenshots/eduzh-v2/iphone-19-sms-code.jpg",phase:"Telefon",title:"SMS-Code eingeben",text:"Geben Sie den sechsstelligen Code aus der SMS ein und tippen Sie auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-20-setup-complete.jpg",phase:"Sicherheit",title:"Einrichtung abschliessen",text:"Prüfen Sie, ob «Telefon» und «Microsoft Authenticator» aufgeführt sind. Tippen Sie anschliessend auf «Fertig»."},
-  {image:"/screenshots/eduzh-v2/iphone-21-change-password.jpg",phase:"Kennwort",title:"Persönliches Kennwort setzen",text:"Geben Sie unter «Aktuelles Kennwort» nochmals das Startkennwort ein. Legen Sie danach ein neues persönliches Kennwort fest und bestätigen Sie es.",tip:"Bewahren Sie Ihr Kennwort sicher auf und geben Sie es niemandem weiter."},
-  {image:"/screenshots/eduzh/iphone-19-wlan-ktzh-s.png",phase:"WLAN",title:"KTZH-S auf dem iPhone einrichten",text:"Verbinden Sie Ihr iPhone nun mit «KTZH-S». Verwenden Sie Ihre vollständige EduZH-Adresse und Ihr persönliches Kennwort. Falls beim Verbinden eine Zertifikatsabfrage erscheint, bestätigen beziehungsweise akzeptieren Sie diese.",tip:"Prüfen Sie zuerst, ob KTZH-S funktioniert. Entfernen Sie danach das temporäre WLAN über «Dieses Netzwerk ignorieren»."},
-  {image:"/screenshots/eduzh-v2/iphone-23-account-ready.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Wählen Sie auf der nächsten Seite Ihren Schulweg."},
-];
+// Texts of all guides. The edit GUI (admin portal of the Infomonitor, ikt.in-form-atik.ch/admin) saves
+// changes on the server; the page loads them from CONTENT_URL and falls back to this bundled copy.
+const CONTENT_URL = "/infomonitor/api/ikt/content";
+const bundledContent = defaultContent as unknown as Content;
 
-const eduzhAndroid: Step[] = [
-  {image:"/screenshots/android-01-suchen.png",phase:"Schritt 01 · Smartphone",title:"Microsoft Authenticator suchen",text:"Öffnen Sie den Google Play Store und suchen Sie nach «Microsoft Authenticator». Für den ganzen EduZH-Erstlogin benötigen Sie nur Ihr Smartphone – noch keinen Computer."},
-  {image:"/screenshots/android-02-laden.jpg",phase:"Gerät wählen",title:"Welches Smartphone verwenden Sie?",text:"Wählen Sie Ihr Gerät aus. Die nächsten Screenshots passen sich automatisch an. Installieren Sie danach «Microsoft Authenticator» und öffnen Sie die App."},
-  {image:"/screenshots/android-03-annehmen.jpg",phase:"Vorbereiten",title:"Datenschutzbestimmungen annehmen",text:"Lesen Sie den Hinweis zu den erforderlichen Diagnosedaten und tippen Sie auf «Annehmen»."},
-  {image:"/screenshots/android-04-weiter.jpg",phase:"Vorbereiten",title:"Einführung fortsetzen",text:"Die freiwillige Freigabe zusätzlicher Nutzungsdaten können Sie ausgeschaltet lassen. Tippen Sie unten auf «Weiter»."},
-  {image:"/screenshots/eduzh-v2/iphone-05-school-or-university-account.png",phase:"Konto hinzufügen",title:"Geschäfts-, Schul- oder Unikonto hinzufügen",text:"Tippen Sie auf «Geschäfts-, Schul- oder Unikonto hinzufügen» – nicht auf «Bei Microsoft anmelden»."},
-  {image:"/screenshots/android-06-email.png",phase:"Anmelden",title:"Mit dem EduZH-Konto anmelden",text:"Geben Sie Ihre vollständige EduZH-Adresse ein und verwenden Sie anschliessend das Startkennwort, das Sie von der Schule erhalten haben.",tip:"Achten Sie auf die Endung @stud.edu.zh.ch."},
-  {image:"/screenshots/android-07-zusatzinfo.png",phase:"Authenticator",title:"Sicherheitsinformationen starten",text:"Microsoft benötigt weitere Sicherheitsinformationen. Tippen Sie auf «Weiter» und bleiben Sie im Browser."},
-  {image:"/screenshots/android-08-koppeln.png",phase:"Authenticator",title:"Konto mit der App koppeln",text:"Tippen Sie auf den blauen Link zum Koppeln. Ihr Smartphone öffnet den Authenticator und richtet das Schulkonto ein."},
-  {image:"/screenshots/android-09-konto.png",phase:"Authenticator",title:"Konto wurde hinzugefügt",text:"Das Schulkonto erscheint jetzt im Authenticator. Bestätigen Sie allfällige Hinweise und wechseln Sie zurück in den Browser."},
-  {image:"/screenshots/android-10-zahl.png",phase:"Authenticator",title:"Anmeldung testen",text:"Im Browser erscheint eine zweistellige Zahl. Merken Sie sich diese Zahl – Sie benötigen sie gleich in der Authenticator-App."},
-  {image:"/screenshots/android-11-bestaetigen.jpg",phase:"Authenticator",title:"Zahl eingeben und bestätigen",text:"Geben Sie im Authenticator die Zahl aus dem Browser ein, tippen Sie auf «Ja» und kehren Sie in den Browser zurück."},
-  {image:"/screenshots/android-12-erfolgreich.png",phase:"Authenticator",title:"Authenticator abschliessen",text:"Die Testanmeldung war erfolgreich. Tippen Sie im Browser auf «Weiter»."},
-  {image:"/screenshots/android-13-telefon.png",phase:"Telefon",title:"Telefonnummer hinzufügen",text:"Wählen Sie «Switzerland (+41)», geben Sie Ihre Mobilnummer ein und fordern Sie den Bestätigungscode per SMS an."},
-  {image:"/screenshots/android-14-sms.png",phase:"Telefon",title:"SMS-Code eingeben",text:"Übertragen Sie den sechsstelligen Code aus der SMS und tippen Sie auf «Weiter»."},
-  {image:"/screenshots/android-15-telefon-bestaetigt.png",phase:"Telefon",title:"Telefonnummer bestätigt",text:"Die Telefonnummer wurde erfolgreich hinzugefügt. Tippen Sie auf «Weiter» oder «Fertig»."},
-  {image:"/screenshots/android-16-methoden.png",phase:"Telefon",title:"Sicherheitsmethoden prüfen",text:"Kontrollieren Sie, ob «Telefon» und «Microsoft Authenticator» aufgeführt sind. Tippen Sie dann auf «Fertig»."},
-  {image:"/screenshots/android-17-kennwort.png",phase:"Kennwort",title:"Persönliches Kennwort setzen",text:"Geben Sie zuerst das Startkennwort ein. Legen Sie danach ein neues persönliches Kennwort fest und bestätigen Sie es.",tip:"Bewahren Sie Ihr Kennwort sicher auf und geben Sie es niemandem weiter."},
-  {image:"/screenshots/eduzh/android-19-wlan-ktzh-s.png",phase:"WLAN",title:"KTZH-S auf dem Smartphone einrichten",text:"Verbinden Sie Ihr Smartphone nun mit «KTZH-S». Verwenden Sie Ihre vollständige EduZH-Adresse und Ihr persönliches Kennwort. Falls beim Verbinden eine Zertifikatsabfrage erscheint, bestätigen beziehungsweise akzeptieren Sie diese.",tip:"Prüfen Sie zuerst, ob KTZH-S funktioniert. Entfernen Sie danach das temporäre WLAN über «Netzwerk vergessen»."},
-  {image:"/screenshots/android-18-fertig.jpg",phase:"Fertig",title:"Ihr Konto ist bereit",text:"Authenticator, Telefonnummer und persönliches Kennwort sind eingerichtet. Wählen Sie auf der nächsten Seite Ihren Schulweg."},
-];
+function mergeContent(base: Content, saved?: Partial<Content> | null): Content {
+  if (!saved || typeof saved !== "object") return base;
+  const lists = { ...base.lists };
+  for (const [key, list] of Object.entries(saved.lists || {})) if (list && Array.isArray(list.steps) && list.steps.length) lists[key] = { ...base.lists[key], ...list };
+  const guides = { ...base.guides };
+  for (const [key, g] of Object.entries(saved.guides || {})) if (guides[key] && g) guides[key] = { ...guides[key], ...g };
+  return { ...base, guides, lists };
+}
 
-const eduzhNoPhone: Step[] = [
-  {phase:"Schritt 01 · Voraussetzung",title:"Anforderungen an den USB-Hauptschlüssel",text:"Für das Erstlogin ohne Smartphone benötigen Sie einen FIDO2 / Passkey-kompatiblen USB-Hauptschlüssel (z. B. Yubico Security Key C NFC oder YubiKey 5). Achten Sie darauf, dass der USB-Stecker (USB-C oder USB-A) zu den Anschlüssen Ihres Laptops passt.",tip:"Der Key muss FIDO2 / Passkey unterstützen und einen physischen Touch-Sensor (Goldkontakt) besitzen. Es sind keine Treiber erforderlich – die Einrichtung erfolgt direkt im Browser (Chrome oder Edge).",shortcut:"FIDO2 / USB"},
-  {phase:"Schritt 02 · Schullaptop",title:"Schullaptop & Browser öffnen",text:"Starten Sie den Schullaptop (oder PC) und verbinden Sie ihn falls nötig mit dem Netzwerk. Öffnen Sie danach Google Chrome oder Microsoft Edge.",shortcut:"Chrome / Edge"},
-  {phase:"Schritt 03 · Portal",title:"Microsoft-Sicherheitsseite aufrufen",text:"Öffnen Sie im Browser die Adresse mysignins.microsoft.com/security-info (oder aka.ms/mfasetup).",shortcut:"mysignins.microsoft.com"},
-  {phase:"Schritt 04 · Anmelden",title:"EduZH-Adresse & Startkennwort eingeben",text:"Geben Sie Ihre vollständige EduZH-Adresse (@stud.edu.zh.ch) und das erhaltene Startkennwort ein.",tip:"Achten Sie auf die genaue Schreibweise der E-Mail-Adresse."},
-  {image:"/screenshots/eduzh-v2/eduzh-no-phone-hauptschluessel.png",phase:"Schritt 05 · Methode",title:"«Anmeldemethode hinzufügen» & «Hauptschlüssel» wählen",text:"Klicken Sie auf den Button «Anmeldemethode hinzufügen». Wählen Sie in der Auswahl die Option «Hauptschlüssel» (Mit Gesicht, Fingerabdruck, PIN oder Sicherheitsschlüssel anmelden)."},
-  {phase:"Schritt 06 · Key-Typ",title:"«Passkey oder Sicherheitsschlüssel» wählen",text:"Wählen Sie im Anmeldedialog den Typ «Passkey oder Sicherheitsschlüssel» aus und klicken Sie auf «Weiter». Halten Sie Ihren USB-Hauptschlüssel bereit."},
-  {phase:"Schritt 07 · Einrichtung",title:"USB-Stick einstecken & Sensor berühren",text:"Stecken Sie den USB-Hauptschlüssel (z. B. Yubico Key C NFC) in den USB-Anschluss des Laptops. Folgen Sie den Browser-Anweisungen: Legen Sie eine PIN fest und berühren Sie den Gold-Sensor des Sticks."},
-  {phase:"Schritt 08 · Benennen",title:"Hauptschlüssel benennen",text:"Geben Sie dem Hauptschlüssel einen eindeutigen Namen (z. B. «Schul-USB-Key») und klicken Sie auf «Weiter» und anschliessend «Fertig»."},
-  {phase:"Schritt 09 · Kennwort",title:"Persönliches Kennwort setzen",text:"Geben Sie unter «Aktuelles Kennwort» nochmals das Startkennwort ein. Legen Sie danach ein neues persönliches Kennwort fest und bestätigen Sie es.",tip:"Bewahren Sie Ihr Kennwort sicher auf und geben Sie es niemandem weiter."},
-  {phase:"Schritt 10 · Fertig",title:"Ihr Konto ist bereit",text:"Die MFA wurde erfolgreich mit dem USB-Hauptschlüssel eingerichtet. Wählen Sie unten Ihren weiteren Schulweg."},
-];
-
-const wlanWindows: Step[] = [
-  {image:"/screenshots/wlan/windows-01.png",phase:"Windows",title:"Netzwerke öffnen",text:"Klicken Sie unten rechts in der Taskleiste auf das Netzwerk- oder Erdkugel-Symbol."},
-  {image:"/screenshots/wlan/windows-02.jpg",phase:"Windows",title:"KTZH-S auswählen",text:"Wählen Sie in der Liste der verfügbaren Netzwerke «KTZH-S»."},
-  {image:"/screenshots/wlan/windows-03.jpg",phase:"Windows",title:"Automatisch verbinden",text:"Aktivieren Sie «Automatisch verbinden» und klicken Sie auf «Verbinden»."},
-  {image:"/screenshots/wlan/windows-04.jpg",phase:"Windows",title:"EduZH-Login eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch und Ihr persönliches Kennwort ein. Klicken Sie auf «OK»."},
-  {image:"/screenshots/wlan/windows-05.jpg",phase:"Windows",title:"Verbindung bestätigen",text:"Bestätigen Sie mit «Verbinden». Ihr Gerät ist jetzt mit KTZH-S verbunden."},
-];
-const wlanMac: Step[] = [
-  {image:"/screenshots/wlan/macos-01.jpg",phase:"macOS",title:"WLAN-Menü öffnen",text:"Klicken Sie oben in der Menüleiste auf das WLAN-Symbol."},
-  {image:"/screenshots/wlan/macos-02.jpg",phase:"macOS",title:"KTZH-S auswählen",text:"Öffnen Sie «Andere Netzwerke» und wählen Sie «KTZH-S»."},
-  {image:"/screenshots/wlan/macos-03.jpg",phase:"macOS",title:"EduZH-Login eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch und Ihr persönliches Kennwort ein. Klicken Sie auf «OK»."},
-  {image:"/screenshots/wlan/macos-04.jpg",phase:"macOS",title:"Zertifikat bestätigen",text:"macOS zeigt das Zertifikat des Netzwerks. Klicken Sie auf «Fortfahren» und bestätigen Sie bei Bedarf mit Ihrem Mac-Kennwort."},
-  {image:"/screenshots/wlan/macos-05.jpg",phase:"macOS",title:"WLAN ist verbunden",text:"Ihr Mac ist jetzt mit KTZH-S verbunden."},
-];
-
-const apps: Step[] = [
-  {phase:"Voraussetzung",title:"BYOD-Installation abschliessen",text:"Diese Anleitung richtet sich an KG- und HMS-Lernende. Bevor Sie Teams, Outlook und OneDrive einrichten, muss die vollständige BYOD-Softwareinstallation auf Ihrem Computer abgeschlossen sein.",tip:"Falls noch Programme fehlen, führen Sie zuerst die BYOD-Installation gemäss den verlinkten Installationsanleitungen durch.",shortcut:"BYOD ✓"},
-  {image:"/screenshots/apps/step-009.jpg",phase:"Teams",title:"Schulkonto hinzufügen",text:"Öffnen Sie in Teams Ihr Profil und wählen Sie «Weiteres Konto hinzufügen»."},
-  {image:"/screenshots/apps/step-012.png",phase:"Teams",title:"EduZH-Adresse eingeben",text:"Geben Sie Ihre Adresse @stud.edu.zh.ch ein und klicken Sie auf «Weiter»."},
-  {image:"/screenshots/apps/step-013.jpg",phase:"Teams",title:"Anmelden",text:"Geben Sie Ihr Kennwort ein und bestätigen Sie die Anmeldung im Authenticator."},
-  {image:"/screenshots/apps/step-019.png",phase:"Teams",title:"Kontoverwendung wählen",text:"Wählen Sie «Ja, alle Apps», damit Ihre Microsoft-Apps dieses Konto nutzen können."},
-  {image:"/screenshots/apps/step-022.jpg",phase:"Teams",title:"Teams ist bereit",text:"Ihr EduZH-Konto ist nun in Teams hinterlegt."},
-  {image:"/screenshots/apps/step-025.jpg",phase:"Outlook",title:"Outlook öffnen",text:"Öffnen Sie Outlook, geben Sie Ihre EduZH-Adresse ein und klicken Sie auf «Weiter»."},
-  {image:"/screenshots/apps/step-029.jpg",phase:"Outlook",title:"Anmeldung bestätigen",text:"Geben Sie Ihr Kennwort ein und bestätigen Sie die Anfrage im Authenticator."},
-  {image:"/screenshots/apps/step-032.png",phase:"Outlook",title:"Für alle Apps anmelden",text:"Wählen Sie «Ja, alle Apps». Damit wird Ihr Schulkonto auch in Outlook eingerichtet."},
-  {image:"/screenshots/apps/step-035.png",phase:"Outlook",title:"Outlook ist bereit",text:"Ihr EduZH-Postfach ist jetzt mit Outlook verbunden."},
-  {image:"/screenshots/apps/step-038.jpg",phase:"OneDrive",title:"OneDrive öffnen",text:"Klicken Sie in der Taskleiste mit der rechten Maustaste auf das OneDrive-Symbol."},
-  {image:"/screenshots/apps/step-039.png",phase:"OneDrive",title:"Einstellungen öffnen",text:"Klicken Sie auf das Zahnrad und öffnen Sie die Einstellungen."},
-  {image:"/screenshots/apps/step-040.jpg",phase:"OneDrive",title:"Konto hinzufügen",text:"Wählen Sie «Konto hinzufügen»."},
-  {image:"/screenshots/apps/step-043.jpg",phase:"OneDrive",title:"EduZH-Adresse eingeben",text:"Geben Sie Ihre EduZH-Adresse ein und klicken Sie auf «Anmelden»."},
-  {image:"/screenshots/apps/step-050.png",phase:"OneDrive",title:"Anmeldung bestätigen",text:"Geben Sie Ihr Kennwort ein, bestätigen Sie im Authenticator und wählen Sie «Ja, alle Apps»."},
-  {image:"/screenshots/apps/step-053.jpg",phase:"OneDrive",title:"OneDrive-Ordner wählen",text:"Klicken Sie auf «Weiter» und wählen Sie, welche Ordner synchronisiert werden sollen."},
-  {image:"/screenshots/apps/step-061.png",phase:"OneDrive",title:"OneDrive ist bereit",text:"Die Einrichtung ist abgeschlossen. Ihre Schuldateien werden jetzt synchronisiert."},
-];
-
-const officeMobileIphone: Step[] = [
-  {image:"/screenshots/ug-mobile/office-apps-ios-android.png",phase:"Schritt 02 · UG",title:"Teams, Outlook und OneNote laden",text:"Öffnen Sie diese Anleitung jetzt am Schul-Computer. Suchen und installieren Sie auf Ihrem iPhone nacheinander Microsoft Teams, Microsoft Outlook und Microsoft OneNote."},
-  {image:"/screenshots/eduzh-v2/iphone-06-email.jpg",phase:"iPhone · Anmelden",title:"Mit dem EduZH-Konto anmelden",text:"Öffnen Sie jede der drei Apps mindestens einmal. Melden Sie sich mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Bestätigen Sie die Anmeldung im Microsoft Authenticator.",tip:"Falls eine App bereits mit einem privaten Konto geöffnet wird, wählen Sie «Konto hinzufügen» und danach Ihr Schulkonto."},
-  {phase:"Schul-Laptop · Prüfen",title:"Die drei Apps am Schul-Laptop öffnen",text:"Öffnen Sie auf einem Schul-Laptop Teams, Outlook und OneNote je einmal. Eine erneute Anmeldung ist nicht nötig.",shortcut:"✓",tip:"Prüfen Sie Ihre Schul-E-Mails in Outlook und Ihre Teams-Nachrichten jeden Tag. Wichtige Informationen und Aufträge werden dort kommuniziert."},
-];
-
-const officeMobileAndroid: Step[] = [
-  {image:"/screenshots/ug-mobile/office-apps-ios-android.png",phase:"Schritt 02 · UG",title:"Teams, Outlook und OneNote laden",text:"Öffnen Sie diese Anleitung jetzt am Schul-Computer. Suchen und installieren Sie auf Ihrem Android-Smartphone nacheinander Microsoft Teams, Microsoft Outlook und Microsoft OneNote."},
-  {image:"/screenshots/android-06-email.png",phase:"Android · Anmelden",title:"Mit dem EduZH-Konto anmelden",text:"Öffnen Sie jede der drei Apps mindestens einmal. Melden Sie sich mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Bestätigen Sie die Anmeldung im Microsoft Authenticator.",tip:"Falls eine App bereits mit einem privaten Konto geöffnet wird, wählen Sie «Konto hinzufügen» und danach Ihr Schulkonto."},
-  {phase:"Schul-Laptop · Prüfen",title:"Die drei Apps am Schul-Laptop öffnen",text:"Öffnen Sie auf einem Schul-Laptop Teams, Outlook und OneNote je einmal. Eine erneute Anmeldung ist nicht nötig.",shortcut:"✓",tip:"Prüfen Sie Ihre Schul-E-Mails in Outlook und Ihre Teams-Nachrichten jeden Tag. Wichtige Informationen und Aufträge werden dort kommuniziert."},
-];
-
-const intranetMobile: Step[] = [
-  {phase:"UG · Intranet",title:"IN2 Mobile installieren",text:"Lesen Sie diese Anleitung am Schulcomputer. Öffnen Sie dort das Intranet unter in2.tam.ch. Installieren Sie anschliessend IN2 Mobile auf Ihrem Smartphone. Die App ermöglicht Ihnen, wichtige Funktionen des Intranets auch unterwegs auf dem Smartphone zu nutzen.",in2Mobile:true,tip:"Scannen Sie den passenden QR-Code für Ihr Gerät und lassen Sie die App nach der Installation auf dem Smartphone. Das Intranet im Browser erreichen Sie unter in2.tam.ch."},
-  {image:"/screenshots/kg-intranet/real/dashboard.png",phase:"UG · Intranet",title:"Das Intranet am Schulcomputer öffnen",text:"Öffnen Sie in2.tam.ch am Schulcomputer. Nach der Anmeldung sehen Sie das Dashboard. Links finden Sie die wichtigsten Bereiche; rechts liegen zum Beispiel Ihr Stundenplan, Ihre Klasse und die Schulbestätigung."},
-  {image:"/screenshots/kg-intranet/real/stundenplan.png",phase:"UG · Stundenplan",title:"Stundenplan anschauen",text:"Im Bereich «Stundenplan» sehen Sie Ihre Lektionen in der Wochenansicht. Schauen Sie sich einmal an, wie Sie zwischen Tagen, Wochen und dem Semester wechseln."},
-  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"UG · Stundenplan",title:"Stundenplan abonnieren",text:"Über das RSS-Symbol bei «Termine» können Sie Ihren Stundenplan und die Schultermine in einer Kalender-App abonnieren (nur relevant, falls Sie einen digitalen Kalender verwenden). Sie müssen sich dabei nichts merken: Fragen Sie bei Unklarheiten Ihre Lehrperson. Sie können selbstverständlich auch einfach einen Papierkalender verwenden."},
-  {image:"/screenshots/kg-intranet/real/absenzen.png",phase:"UG · Absenzen",title:"Absenzenerfassung kennenlernen",text:"Unter «Absenzen» sehen Sie Ihre erfassten Absenzen. Hier können Sie auch Joker-Tags-Gesuche sowie Dispensationsgesuche bis 1 Tag und über 1 Tag einreichen. Schauen Sie sich den Bereich an, senden Sie aber keine Testabsenz ab."},
-  {image:"/screenshots/kg-intranet/real/notenbuechlein.png",phase:"UG · Noten",title:"Notenbüchlein anschauen",text:"Im Menü «Noten» finden Sie das Notenbüchlein. Öffnen Sie die Übersicht einmal, damit Sie später wissen, wo Ihre Noten angezeigt werden."},
-  {image:"/screenshots/kg-intranet/real/schulbestaetigung.png",phase:"UG · Dokumente",title:"Schulbestätigung finden",text:"Unter «Dokumente & Dateien» finden Sie die Schulbestätigung. Öffnen Sie das Menü einmal, damit Sie bei Bedarf rasch wissen, wo das Dokument abgelegt ist."},
-];
-
-const kgIntranet: Step[] = [
-  {phase:"KG / HMS · Intranet",title:"IN2 Mobile installieren",text:"Installieren Sie IN2 Mobile auf Ihrem Smartphone. Die App ermöglicht Ihnen, wichtige Funktionen des Intranets auch unterwegs auf dem Smartphone zu nutzen.",in2Mobile:true,tip:"Scannen Sie den passenden QR-Code für Ihr Gerät und lassen Sie die App nach der Installation auf dem Smartphone. Das Intranet im Browser erreichen Sie unter in2.tam.ch."},
-  {image:"/screenshots/kg-intranet/real/dashboard.png",phase:"KG · Intranet",title:"Das Intranet auf dem Laptop öffnen",text:"Öffnen Sie in2.tam.ch auf Ihrem Laptop. Nach der Anmeldung sehen Sie das Dashboard. Links finden Sie die wichtigsten Bereiche; rechts liegen zum Beispiel Ihr Stundenplan, Ihre Klasse und die Schulbestätigung."},
-  {image:"/screenshots/kg-intranet/real/stundenplan.png",phase:"KG · Stundenplan",title:"Stundenplan anschauen",text:"Im Bereich «Stundenplan» sehen Sie Ihre Lektionen in der Wochenansicht. Schauen Sie sich einmal an, wie Sie zwischen Tagen, Wochen und dem Semester wechseln."},
-  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"KG · Stundenplan",title:"Stundenplan abonnieren",text:"Über das RSS-Symbol bei «Termine» können Sie Ihren Stundenplan und die Schultermine in einer Kalender-App abonnieren (nur relevant, falls Sie einen digitalen Kalender verwenden). Sie müssen sich dabei nichts merken: Fragen Sie bei Unklarheiten Ihre Lehrperson. Sie können selbstverständlich auch einfach einen Papierkalender verwenden."},
-  {image:"/screenshots/kg-intranet/real/absenzen.png",phase:"KG · Absenzen",title:"Absenzenerfassung kennenlernen",text:"Unter «Absenzen» sehen Sie Ihre erfassten Absenzen. Hier können Sie auch Joker-Tags-Gesuche sowie Dispensationsgesuche bis 1 Tag und über 1 Tag einreichen. Schauen Sie sich den Bereich an, senden Sie aber keine Testabsenz ab."},
-  {image:"/screenshots/kg-intranet/real/notenbuechlein.png",phase:"KG · Noten",title:"Notenbüchlein anschauen",text:"Im Menü «Noten» finden Sie das Notenbüchlein. Öffnen Sie die Übersicht einmal, damit Sie später wissen, wo Ihre Noten angezeigt werden."},
-  {image:"/screenshots/kg-intranet/real/schulbestaetigung.png",phase:"KG · Dokumente",title:"Schulbestätigung finden",text:"Unter «Dokumente & Dateien» finden Sie die Schulbestätigung. Öffnen Sie das Menü einmal, damit Sie bei Bedarf rasch wissen, wo das Dokument abgelegt ist."},
-];
-
-const printer: Step[] = [
-  {image:"/screenshots/printer/qr-anmeldung.png",phase:"KG / HMS · Erstanmeldung",title:"Am Drucker per QR-Code anmelden",text:"Gehen Sie zu einem Multifunktionsdrucker und scannen Sie den QR-Code auf dem Display mit Ihrem Smartphone. Öffnen Sie den angezeigten Link, melden Sie sich mit Ihrem EduZH-Konto an und bestätigen Sie bei Bedarf in der Authenticator-App.",tip:"Falls der Drucker nach der Anmeldung noch den QR-Code anzeigt, scannen Sie ihn einfach ein zweites Mal."},
-  {image:"/screenshots/printer/badge-verknuepfen.png",phase:"KG / HMS · Ausweis / Badge",title:"Badge oder Legi am Drucker verknüpfen",text:"Nach der Erstanmeldung am Drucker tippen Sie oben rechts auf dem Display auf «Karte verknüpfen». Halten Sie anschliessend Ihren RFID-Badge bzw. Ihre Legi (Legitimationskarte) an den Kartenleser (schwarzes Rechteck unterhalb des Displays). Sobald «Karte erfolgreich verknüpft» erscheint, ist Ihre Karte registriert.",tip:"Für Schülerinnen und Schüler (SuS) dient die Legi (Legitimationskarte) als RFID-Badge. Die Verknüpfung muss nur ein einziges Mal durchgeführt werden."},
-  {image:"/screenshots/printer/badge-an-leser-halten.png",phase:"KG / HMS · Alltag",title:"Künftige Anmeldung mit Badge / Legi",text:"Im Schulalltag melden Sie sich schnell und ohne Smartphone an: Tippen Sie am Drucker auf die Kachel «Pixio» und halten Sie Ihren Badge oder Ihre Legi an den Kartenleser unter dem Display. Sie werden sofort automatisch angemeldet.",tip:"Sollten Sie Ihre Legi oder Ihren Badge einmal nicht dabeihaben, können Sie sich jederzeit weiterhin per Smartphone (QR-Code) am Drucker anmelden."},
-  {image:"/screenshots/printer/pixio-uebersicht.png",phase:"KG / HMS · Druckauftrag",title:"Datei in Pixio hochladen",text:"Öffnen Sie auf Ihrem BYOD-Gerät im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem EduZH-Konto an. Über das Pluszeichen (+) erstellen Sie einen neuen Druckauftrag und wählen Ihre Datei aus.",tip:"Das Web-Portal funktioniert direkt im Browser ohne Treiberinstallation."},
-  {image:"/screenshots/printer/druckauftrag-erstellen.png",phase:"KG / HMS · Einstellungen",title:"Druckeinstellungen wählen",text:"Wählen Sie bei Bedarf Schwarz-Weiss oder Farbe, ein- oder doppelseitig und die Anzahl Kopien. Klicken Sie anschliessend auf «Erstellen»; der Auftrag wird an Ihre persönliche Warteschlange übermittelt.",tip:"Aufträge bleiben 72 Stunden in Ihrer persönlichen Warteschlange gespeichert und können an jedem Schul-Drucker abgerufen werden."},
-  {image:"/screenshots/printer/druckauftrag-abholen.png",phase:"KG / HMS · Abholen",title:"Auftrag am Drucker freigeben & abmelden",text:"Melden Sie sich am gewünschten Drucker per Badge/Legi an. Wählen Sie den Auftrag im Reiter «Queue Print» und tippen Sie auf «Drucken» (oder «Drucken & Behalten»). Tippen Sie zum Abschluss oben rechts auf Ihren Namen, um sich abzumelden.",tip:"Nehmen Sie Ausdrucke sofort mit. Nach 60 Sekunden Inaktivität erfolgt am Drucker automatisch eine Sicherheitsabmeldung."},
-];
-
-const ugWorkflow: Step[] = [
-  {phase:"Untergymnasium · Ablauf",title:"So geht es jetzt weiter",text:"Melden Sie sich zuerst am Schul-Computer mit Ihrer vollständigen EduZH-Adresse und Ihrem persönlichen Kennwort an. Öffnen Sie danach Moodle und die Aufgabenliste. Klicken Sie beim jeweiligen Auftrag auf den Link; er öffnet diese Anleitung in einem neuen Tab. Nach dem Abschluss markieren Sie die Aufgabe in Moodle als erledigt und gehen zur nächsten Aufgabe weiter.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. Verwenden Sie für die Anmeldung den Button «EduZH-Login» unterhalb der beiden Felder für Benutzername und Passwort. Falls der Kurs nach der Anmeldung nicht direkt erscheint, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung».",flow:["Am Schul-Computer mit EduZH-Adresse und persönlichem Kennwort anmelden","In Moodle anmelden und Aufgabenliste öffnen","Link im neuen Tab öffnen und Aufgabe bearbeiten","In Moodle als erledigt markieren","Nächste Aufgabe öffnen"]},
-];
-
-const kgWorkflow: Step[] = [
-  {phase:"Kurzzeitgymnasium / HMS · Ablauf",title:"So geht es jetzt weiter",text:"Melden Sie sich auf Ihrem BYOD-Gerät in Moodle an und öffnen Sie die Aufgabenliste. Klicken Sie beim jeweiligen Auftrag auf den Link; er öffnet diese Anleitung in einem neuen Tab. Nach dem Abschluss markieren Sie die Aufgabe in Moodle als erledigt und gehen zur nächsten Aufgabe weiter.",tip:"Moodle werden Sie künftig in vielen Kursen verwenden. Verwenden Sie für die Anmeldung den Button «EduZH-Login» unterhalb der beiden Felder für Benutzername und Passwort. Falls der Kurs nach der Anmeldung nicht direkt erscheint, wählen Sie oben «Meine Kurse» und danach «IKT-Einführung».",flow:["In Moodle anmelden und Aufgabenliste öffnen","Link im neuen Tab öffnen und Aufgabe bearbeiten","In Moodle als erledigt markieren","Nächste Aufgabe öffnen"]},
-];
-
-const peerSupportMac: Step[] = [
-  {phase:"Lehrpersonen · macOS Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Dieses Skript richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem macOS-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: macOS Sonoma (14+), Internetverbindung & Admin-Rechte (sudo). Speichern Sie das Skript (.sh) und das Treiberpaket (.pkg) im selben Ordner.",shortcut:"sh + pkg",flow:["Skript (.sh) & Treiberpaket (.pkg) herunterladen","Persönliche IPP-URL aus Pixio kopieren","Skript im Terminal ausführbar machen & starten","Badge oder Legi am Drucker verknüpfen"]},
-  {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
-  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Terminal",title:"Skript im Terminal ausführen",text:"Wechseln Sie im Terminal in den Ordner mit den beiden Dateien. Machen Sie das Skript mit «chmod +x macOS-Printer-Connect.sh» ausführbar und starten Sie es mit «./macOS-Printer-Connect.sh».",tip:"Abfragen im Terminal: 1. IPP-URL einfügen · 2. Name wählen (Enter für FDU) · 3. Refresh (y/N) bei Neuinstallation · 4. Admin-Passwort für sudo eingeben.",shortcut:"zsh"},
-  {image:"/screenshots/printer/badge-verknuepfen.png",phase:"Schritt 03 · Ausweis / Badge",title:"Badge oder Legi am Drucker verknüpfen",text:"Melden Sie sich einmalig am Multifunktionsdrucker an (z. B. via QR-Code mit dem Smartphone) und tippen Sie oben rechts auf «Karte verknüpfen». Halten Sie anschliessend Ihren Personalbadge oder Ihre Legitimationskarte (Legi) an das Lesegerät unter dem Display. Künftig melden Sie sich durch einfaches Hinhalten der Karte am Gerät an.",tip:"Schülerinnen und Schüler (SuS) nutzen ihre Legitimationskarte (Legi) analog wie einen Personalbadge.",shortcut:"Badge / Legi"}
-];
-
-const peerSupportWindows: Step[] = [
-  {phase:"Lehrpersonen · Windows Druckertreiber",title:"Installation Druckerwarteschlange (FDU)",text:"Diese Batch-Datei richtet eine persönliche Follow-Me Druckerwarteschlange (z.B. «FDU») auf einem Windows-BYOD-Gerät ein, damit direkt aus Anwendungen wie Microsoft Word gedruckt werden kann, ohne Pixio zu verwenden.",tip:"Voraussetzungen: Windows 10 / 11, Internetverbindung & Administrator-Rechte. Laden Sie das ZIP-Archiv herunter und entpacken Sie es vor dem Start.",shortcut:"bat + zip",flow:["ZIP-Archiv (Win-Printer-Connect.zip) herunterladen & entpacken","Persönliche IPP-URL aus Pixio kopieren","Win-Printer-Connect.bat per Doppelklick starten","Badge oder Legi am Drucker verknüpfen"]},
-  {image:"/screenshots/printer/pixio-ipp-queue.png",phase:"Schritt 01 · Pixio Portal",title:"Persönliche IPP-Warteschlange kopieren",text:"Öffnen Sie im Browser das Pixio-Portal (pixio.triboni.net) und melden Sie sich mit Ihrem Windows-Account (vorname.nachname@edu.zh.ch) an. Kopieren Sie unter «Mobile Print App» die gelb markierte URL bei «Persönliche IPP Queue».",tip:"Format: https://pixio.triboni.net/triboni/ipp/pix1/... — Hinweistipp: Pixio-Queues können ablaufen; bei späteren Verbindungsproblemen Schritt 1 wiederholen.",shortcut:"01"},
-  {image:"/screenshots/printer/terminal-ipp-prompt.png",phase:"Schritt 02 · Batch-Datei",title:"Win-Printer-Connect.bat ausführen",text:"Öffnen Sie den entpackten Ordner und führen Sie «Win-Printer-Connect.bat» aus (Rechtsklick → Als Administrator ausführen). Füge bei der Abfrage «Verbindungsname:» die kopierte IPP-URL ein und drücke Enter.",tip:"Der Drucker wird anschliessend unter dem Namen «FDU» auf Ihrem PC eingerichtet.",shortcut:"CMD"},
-  {image:"/screenshots/printer/badge-verknuepfen.png",phase:"Schritt 03 · Ausweis / Badge",title:"Badge oder Legi am Drucker verknüpfen",text:"Melden Sie sich einmalig am Multifunktionsdrucker an (z. B. via QR-Code mit dem Smartphone) und tippen Sie oben rechts auf «Karte verknüpfen». Halten Sie anschliessend Ihren Personalbadge oder Ihre Legitimationskarte (Legi) an das Lesegerät unter dem Display. Künftig melden Sie sich durch einfaches Hinhalten der Karte am Gerät an.",tip:"Schülerinnen und Schüler (SuS) nutzen ihre Legitimationskarte (Legi) analog wie einen Personalbadge.",shortcut:"Badge / Legi"}
-];
-
-const beamerAirserver: Step[] = [
-  {phase:"Lehrpersonen · Medientechnik",title:"Beamer- & AirServer-Anleitung",text:"Hier finden Sie die Anleitung für die Medientechnik in den Unterrichtsräumen: Steuerung von Anlage, Quellenwahl, Projektor, Monitor und AirServer.",tip:"Die PDF-Anleitung fasst alle Funktionen im Unterrichtsraum auf 2 Seiten übersichtlich zusammen.",shortcut:"PDF",flow:["Beamer und AirServer bedienen","Medientechnik im Unterrichtsraum steuern"]}
-];
-
-const challengeWindows: Step[] = [
-  {phase:"Tiling",title:"Zwei Fenster nebeneinander",text:"Öffnen Sie Browser und Datei-Explorer. Legen Sie den Browser links und den Explorer rechts ab.",shortcut:"Win + ← / →"},
-  {phase:"Tiling",title:"Fenster in eine Ecke legen",text:"Drücken Sie zuerst Win + Pfeil links oder rechts und direkt danach Pfeil hoch oder runter. Ordnen Sie vier Fenster als Raster an.",shortcut:"Win + ←, dann ↑"},
-  {phase:"Tiling",title:"Maximieren und verkleinern",text:"Maximieren Sie das aktive Fenster. Drücken Sie danach den Gegenbefehl zweimal, um es wiederherzustellen und zu minimieren.",shortcut:"Win + ↑ / ↓"},
-  {phase:"Snap Layouts",title:"Ein Layout auswählen",text:"Öffnen Sie die Snap-Layouts, wählen Sie ein Dreispalten-Layout und verteilen Sie Browser, Teams und Explorer.",shortcut:"Win + Z"},
-  {phase:"Apps",title:"Zwischen Programmen wechseln",text:"Halten Sie Alt gedrückt und tippen Sie wiederholt auf Tab. Wechseln Sie gezielt zwischen Browser, Teams und Explorer.",shortcut:"Alt + Tab"},
-  {phase:"Desktops",title:"Virtuellen Desktop erstellen",text:"Erstellen Sie einen neuen Desktop und öffnen Sie dort Outlook.",shortcut:"Win + Ctrl + D"},
-  {phase:"Desktops",title:"Zwischen Desktops wechseln",text:"Wechseln Sie ohne Maus zum vorherigen Desktop und wieder zurück.",shortcut:"Win + Ctrl + ← / →"},
-  {phase:"Bildschirme",title:"Fenster auf einen anderen Monitor",text:"Falls ein zweiter Bildschirm vorhanden ist: verschieben Sie das aktive Fenster dorthin und wieder zurück.",shortcut:"Win + Shift + ← / →"},
-  {phase:"Finale",title:"Windows-Tiling-Mission",text:"Bauen Sie ein Dreifenster-Layout, verschieben Sie Teams auf einen zweiten Desktop und kehren Sie nur mit der Tastatur zum Browser zurück.",shortcut:"Win + Z · Alt + Tab"},
-];
-const challengeMac: Step[] = [
-  {phase:"Rectangle",title:"Zwei Fenster nebeneinander",text:"Öffnen Sie Safari und Finder. Legen Sie Safari in die linke und Finder in die rechte Bildschirmhälfte.",shortcut:"Ctrl + Option + ← / →",tip:"Dies sind die Rectangle-Standardkürzel. Sie können in Rectangle angepasst worden sein."},
-  {phase:"Rectangle",title:"Fenster in die Ecken legen",text:"Ordnen Sie vier Fenster oben links, oben rechts, unten links und unten rechts an.",shortcut:"Ctrl + Option + U / I / J / K"},
-  {phase:"Rectangle",title:"Fenster maximieren",text:"Maximieren Sie das aktive Fenster mit Rectangle und stellen Sie danach die vorherige Grösse wieder her.",shortcut:"Ctrl + Option + Return"},
-  {phase:"Rectangle",title:"Fenster zentrieren",text:"Verkleinern Sie ein Fenster und setzen Sie es anschliessend exakt in die Bildschirmmitte.",shortcut:"Ctrl + Option + C"},
-  {phase:"Rectangle",title:"Drei Spalten bauen",text:"Ordnen Sie Browser, Teams und Finder im linken, mittleren und rechten Drittel an.",shortcut:"Ctrl + Option + D / F / G"},
-  {phase:"Apps",title:"Zwischen Programmen wechseln",text:"Halten Sie Command gedrückt und tippen Sie auf Tab. Wechseln Sie gezielt zwischen Safari, Teams und Finder.",shortcut:"Command + Tab"},
-  {phase:"Spaces",title:"Neuen Schreibtisch nutzen",text:"Öffnen Sie Mission Control, erstellen Sie einen neuen Schreibtisch und öffnen Sie dort Outlook.",shortcut:"Ctrl + ↑"},
-  {phase:"Spaces",title:"Zwischen Schreibtischen wechseln",text:"Wechseln Sie ohne Maus zum vorherigen Schreibtisch und wieder zurück.",shortcut:"Ctrl + ← / →"},
-  {phase:"Bildschirme",title:"Fenster zum nächsten Monitor",text:"Falls ein zweiter Bildschirm vorhanden ist: verschieben Sie das aktive Fenster mit Rectangle dorthin.",shortcut:"Ctrl + Option + Command + →"},
-  {phase:"Finale",title:"Rectangle-Tiling-Mission",text:"Bauen Sie ein Dreispalten-Layout, verschieben Sie Teams auf einen zweiten Schreibtisch und kehren Sie nur mit der Tastatur zu Safari zurück.",shortcut:"D / F / G · Command + Tab"},
-];
-
-const shortcutsWindows: Step[] = [
-  {phase:"Vorbereitung",title:"Geeigneten Arbeitsort öffnen",text:"Öffnen Sie ein Dokument, in dem Sie schreiben und markieren dürfen. Sie können beispielsweise das Word-Dokument aus der Steckbrief-Challenge verwenden. Bewegen Sie den Cursor anschliessend fünf Wörter nach rechts und zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Ctrl + ← / →",tip:"Speichern Sie das Dokument zuerst unter einem eigenen Dateinamen, damit Ihre Vorlage unverändert bleibt."},
-  {phase:"Markieren",title:"Wörter präzise markieren",text:"Markieren Sie die nächsten drei Wörter ab der Cursorposition. Kopieren Sie noch nichts.",shortcut:"Ctrl + Shift + →"},
-  {phase:"Auswahl",title:"Alles auswählen",text:"Markieren Sie den gesamten Text mit einem einzigen Kürzel und heben Sie die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Ctrl + A"},
-  {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopieren Sie einen Satz, fügen Sie ihn an einer neuen Stelle ein und verschieben Sie einen zweiten Satz per Ausschneiden.",shortcut:"Ctrl + C / X / V"},
-  {phase:"Bearbeiten",title:"Fehler rückgängig machen",text:"Löschen Sie absichtlich ein Wort, machen Sie die Aktion rückgängig und führen Sie sie danach nochmals aus.",shortcut:"Ctrl + Z · Ctrl + Shift + Z"},
-  {phase:"Dokument",title:"Suchen, speichern, drucken",text:"Suchen Sie im Dokument nach einem Wort, speichern Sie und öffnen Sie zuletzt den Druckdialog. Brechen Sie den Druckdialog wieder ab.",shortcut:"Ctrl + F / S / P"},
-  {phase:"Programme",title:"Fenster wechseln und schliessen",text:"Wechseln Sie zu einem anderen Programm, kehren Sie zurück und schliessen Sie anschliessend ein nicht benötigtes Fenster.",shortcut:"Alt + Tab · Alt + F4"},
-  {phase:"Sicherheit",title:"Computer sperren",text:"Sperren Sie den Computer und melden Sie sich danach wieder an.",shortcut:"Win + L"},
-  {phase:"Browser",title:"Tabs steuern",text:"Öffnen Sie zwei neue Tabs, wechseln Sie zum rechten Tab, schliessen Sie ihn und stellen Sie ihn wieder her.",shortcut:"Ctrl + T / Tab / W · Ctrl + Shift + T"},
-  {phase:"Code",title:"Code ein- und ausrücken",text:"Markieren Sie mehrere Codezeilen, rücken Sie sie einmal ein und danach wieder aus.",shortcut:"Tab · Shift + Tab"},
-  {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopieren Sie Text, finden Sie ein Wort, wechseln Sie die App, öffnen Sie einen Browser-Tab und stellen Sie einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
-];
-const shortcutsMac: Step[] = [
-  {phase:"Vorbereitung",title:"Geeigneten Arbeitsort öffnen",text:"Öffnen Sie ein Dokument, in dem Sie schreiben und markieren dürfen. Sie können beispielsweise das Word-Dokument aus der Steckbrief-Challenge verwenden. Bewegen Sie den Cursor anschliessend fünf Wörter nach rechts und zwei Wörter zurück, ohne die Maus zu benutzen.",shortcut:"Option + ← / →",tip:"Speichern Sie das Dokument zuerst unter einem eigenen Dateinamen, damit Ihre Vorlage unverändert bleibt."},
-  {phase:"Markieren",title:"Wörter präzise markieren",text:"Markieren Sie die nächsten drei Wörter ab der Cursorposition. Kopieren Sie noch nichts.",shortcut:"Option + Shift + →"},
-  {phase:"Auswahl",title:"Alles auswählen",text:"Markieren Sie den gesamten Text mit einem einzigen Kürzel und heben Sie die Auswahl danach mit einer Pfeiltaste wieder auf.",shortcut:"Command + A"},
-  {phase:"Zwischenablage",title:"Kopieren, ausschneiden, einfügen",text:"Kopieren Sie einen Satz und fügen Sie ihn neu ein. Verschieben Sie danach eine Datei mit Kopieren und der Einfügen-Variante zum Bewegen.",shortcut:"Command + C / V · Option + Command + V"},
-  {phase:"Bearbeiten",title:"Fehler rückgängig machen",text:"Löschen Sie absichtlich ein Wort, machen Sie die Aktion rückgängig und führen Sie sie danach nochmals aus.",shortcut:"Command + Z · Command + Shift + Z"},
-  {phase:"Dokument",title:"Suchen, speichern, drucken",text:"Suchen Sie im Dokument nach einem Wort, speichern Sie und öffnen Sie zuletzt den Druckdialog. Brechen Sie den Druckdialog wieder ab.",shortcut:"Command + F / S / P"},
-  {phase:"Programme",title:"Programme und Fenster wechseln",text:"Wechseln Sie zu einer anderen App. Wechseln Sie danach zwischen zwei Fenstern derselben App und schliessen Sie die App.",shortcut:"Command + Tab · Command + < · Command + Q"},
-  {phase:"Sicherheit",title:"Computer sperren",text:"Sperren Sie den Mac und melden Sie sich danach wieder an.",shortcut:"Command + Ctrl + Q"},
-  {phase:"Browser",title:"Tabs steuern",text:"Öffnen Sie zwei neue Tabs, wechseln Sie zum rechten Tab, schliessen Sie ihn und stellen Sie ihn wieder her.",shortcut:"Command + T / Option + → / W · Command + Shift + T"},
-  {phase:"Code",title:"Code ein- und ausrücken",text:"Markieren Sie mehrere Codezeilen, rücken Sie sie einmal ein und danach wieder aus.",shortcut:"Tab · Shift + Tab"},
-  {phase:"Finale",title:"Die 60-Sekunden-Mission",text:"Kopieren Sie Text, finden Sie ein Wort, wechseln Sie die App, öffnen Sie einen Browser-Tab und stellen Sie einen geschlossenen Tab wieder her - alles ohne Maus.",shortcut:"C · F · Tab · T · Shift + T"},
-];
-
-const profile: Step[] = [
-  {phase:"Auftrag",title:"Ihr digitales Kurzprofil",text:"Erstellen Sie ein digitales Kurzprofil über sich. Ihre Lehrpersonen sowie Ihre Mitschülerinnen und Mitschüler sollen einen ersten Eindruck davon erhalten, wer Sie sind und was Sie als Person ausmacht.",shortcut:"ICH"},
-  {phase:"Grundangaben",title:"Wer sind Sie?",text:"Nennen Sie Ihren Vor- und Nachnamen sowie Ihre Klasse. Ergänzen Sie ein Foto von sich, drei Wörter, die Sie beschreiben, etwas, das man über Sie wissen sollte, etwas, das Sie motiviert, und eine Stärke, die Sie in die Klasse einbringen.",shortcut:"01"},
-  {phase:"Persönliches",title:"Was passt zu Ihnen?",text:"Ergänzen Sie ein Ziel für dieses Schuljahr, einen Ort, an dem Sie sich wohlfühlen, und einen Gegenstand, Song, Film, ein Game, eine Sportart, ein Hobby oder ein Zitat, das zu Ihnen passt. Begründen Sie Ihre Wahl kurz und nennen Sie einen Fun Fact, den Sie teilen möchten.",shortcut:"02",tip:"Weitere passende Informationen dürfen Sie gerne ergänzen."},
-  {phase:"Werkzeug",title:"Gestaltungsform wählen",text:"Sie entscheiden selbst über die Gestaltung. Möglich sind beispielsweise eine OneNote-Seite, Word, PowerPoint, Canva oder ein anderes vertrautes Programm. Wenn Sie mit Word noch unsicher sind, können Sie die vorbereitete Vorlage verwenden.",shortcut:"APP"},
-  {phase:"Gestaltung",title:"Übersichtlich und persönlich",text:"Gestalten Sie Ihr Kurzprofil gut lesbar und ansprechend. Bilder, Symbole und Emojis sind ausdrücklich erwünscht und können unterhalb der Liste oder passend neben einzelnen Punkten eingefügt werden.",shortcut:"Aa"},
-  {phase:"Sicherheit",title:"Privates bleibt privat",text:"Teilen Sie nur Informationen, die Lehrpersonen und die Klasse sehen dürfen. Adresse, Telefonnummer, private Social-Media-Profile und sehr persönliche Angaben gehören nicht in das Kurzprofil.",shortcut:"🔒"},
-  {phase:"Eigenleistung",title:"Die Inhalte stammen von Ihnen",text:"Das Kurzprofil soll von Ihnen selbst erstellt werden. Vollständig KI-generierte Profile sind nicht erlaubt. Digitale Hilfsmittel für Gestaltung, Rechtschreibung oder Layout sind erlaubt; die persönlichen Inhalte müssen jedoch von Ihnen stammen und wirklich zu Ihnen passen.",shortcut:"✓"},
-  {phase:"Abgabe",title:"Speichern und in Teams ablegen",text:"Speichern Sie die fertige Datei als Klasse_Nachname_Vorname_Kurzprofil. Legen Sie sie anschliessend im Kanal «Steckbrief» des Klassenteams (z. B. «K26b (FDU)») unter «Freigegeben» in den Ordner «Steckbriefe» hoch.",shortcut:"SAVE",tip:"Kontrollieren Sie vor der Abgabe noch einmal Dateiname, Lesbarkeit und Inhalt."},
-  {phase:"Bonus",title:"Bonus für schnelle Profis",text:"Fügen Sie ein passendes Symbol, Emoji oder kleines Bild ein, nutzen Sie passende Farben und schreiben Sie zu mindestens einem Punkt einen kurzen Satz statt nur eines Wortes. Wenn Sie fertig sind, helfen Sie einer Person in Ihrer Nähe.",shortcut:"+"},
-];
-
-const klpCalendar: Step[] = [
-  {image:"/screenshots/kg-intranet/real/stundenplan-abonnieren.png",phase:"Intranet",title:"Kalender-Link im Stundenplan öffnen",text:"Öffnen Sie im Intranet den Bereich «Stundenplan». Beim Abschnitt «Termine» klicken Sie auf das RSS-/Abo-Symbol. Kopieren Sie den angezeigten Kalender-Link – Sie brauchen ihn nur einmal.",tip:"Das Abonnement ist nur relevant, falls Sie einen digitalen Kalender (z. B. Outlook, Apple Kalender, Google Kalender) nutzen."},
-  {phase:"Google Kalender",title:"Schulkalender in Google Kalender abonnieren",text:"Öffnen Sie Google Kalender im Browser. Klicken Sie links neben «Weitere Kalender» auf «+» und wählen Sie «Per URL». Fügen Sie den kopierten Kalender-Link ein und bestätigen Sie mit «Kalender hinzufügen».",tip:"Änderungen im Schulkalender werden danach automatisch übernommen. Die erste Aktualisierung kann etwas dauern."},
-  {phase:"Apple Kalender · Mac",title:"Schulkalender auf dem Mac abonnieren",text:"Öffnen Sie die App «Kalender». Wählen Sie in der Menüleiste «Ablage» → «Neues Kalenderabonnement», fügen Sie den Kalender-Link ein und klicken Sie auf «Abonnieren». Wählen Sie anschliessend, wie oft der Kalender aktualisiert werden soll."},
-  {phase:"Apple Kalender · iPhone/iPad",title:"Schulkalender auf iPhone oder iPad abonnieren",text:"Öffnen Sie «Einstellungen» → «Apps» → «Kalender» → «Kalenderaccounts» → «Account hinzufügen» → «Andere» → «Kalenderabo hinzufügen». Fügen Sie den Kalender-Link ein, bestätigen Sie und speichern Sie das Abo."},
-  {phase:"Kontrolle",title:"Termine prüfen",text:"Öffnen Sie die Kalender-App und blenden Sie den neuen Schulkalender ein. Prüfen Sie, ob die nächsten Schultermine sichtbar sind. Der Kalender ist ein Abo: Änderungen im Intranet erscheinen automatisch, Sie müssen ihn nicht erneut importieren."},
-];
-
-const klpFobizz: Step[] = [
-  {image:"/screenshots/klp/fobizz/01-mein-fobizz.png",phase:"Start",title:"Anmeldung & «Mein fobizz» öffnen",text:"Melden Sie sich auf fobizz.com an. Wählen Sie beim Erstlogin die Anmeldung über «Microsoft» (mit Ihrer Schul-E-Mail-Adresse). Klicken Sie anschliessend oben rechts auf Ihr Profilbild und öffnen Sie «Mein fobizz».",tip:"Schullizenz: Der Zugriffscode für die Schullizenz ist nicht öffentlich auf dieser Webseite einsehbar, sondern muss direkt bei Enver Kilinc bestellt werden."},
-  {image:"/screenshots/klp/fobizz/02-klassenraeume-menu.png",phase:"Klassenräume",title:"Zu «Klassenräume» wechseln",text:"Wählen Sie im Menü «Klassenräume». Ein Klassenraum bildet eine Lerngruppe ab und bleibt bei der Jahresvariante für das ganze Schuljahr bestehen."},
-  {image:"/screenshots/klp/fobizz/03-klassenraum-auswahl.png",phase:"Klassenräume",title:"Passende Laufzeit wählen",text:"Klicken Sie auf «Anlegen». Verwenden Sie «Klassenraum · 1 Jahr» für Ihre Klasse. «Klassenraum · 24 h» eignet sich für einen einmaligen, kurzen Einsatz."},
-  {image:"/screenshots/klp/fobizz/04-klassenraum-anlegen.png",phase:"Klassenraum anlegen",title:"Klasse benennen und Anzahl Zugänge festlegen",text:"Geben Sie dem Klassenraum einen eindeutigen Namen, zum Beispiel «K26b». Tragen Sie die Anzahl Schüler*innen ein und klicken Sie auf «Klassenraum anlegen». Kolleg*innen können Sie später im Reiter «Lehrkräfte» einladen."},
-  {image:"/screenshots/klp/fobizz/05-zugang-projekt.png",phase:"Zugang & Projekt",title:"Zugangscodes und erstes Projekt vorbereiten",text:"Über «Zugangscodes anzeigen» erhalten Sie die anonymen Codes für Ihre Schüler*innen. Mit «Neues Projekt anlegen» erstellen Sie eine konkrete Unterrichtsaktivität und fügen dort Arbeitsauftrag, Materialien oder Tools hinzu.",tip:"Notieren Sie die Zuordnung zwischen Code und Person nur dann, wenn Sie individuelle Aktivitäten nachvollziehen möchten."},
-  {image:"/screenshots/klp/fobizz/09-zugangscodes-drucken.png",phase:"Zugangscodes",title:"Codes ausdrucken oder nach Excel kopieren",text:"Wählen Sie zum Verteilen der Zugangscodes entweder «Drucken» oder nutzen Sie die digitale Liste. Verteilen Sie jeder Person genau einen Code. Die Schüler*innen öffnen go.fobizz.com beziehungsweise scannen den QR-Code – ein eigenes fobizz-Konto ist dafür nicht nötig.",tip:"Digitaler Export: Weiter unten auf der Seite sieht man eine Liste der Zugangscodes, die man direkt kopieren und in eine Excel-Tabelle (xlsx) bzw. Schülerliste einfügen kann."},
-  {image:"/screenshots/klp/fobizz/06-assistenten-uebersicht.png",phase:"KI-Assistenten",title:"Eigenen Assistenten starten",text:"Öffnen Sie «Tools» → «KI Assistenten» und wählen Sie links «Eigene Assistenten». Klicken Sie anschliessend auf «Assistent anlegen». Ein Assistent ist ein vorkonfigurierter Chatbot für eine klar definierte Unterrichtsaufgabe."},
-  {image:"/screenshots/klp/fobizz/07-assistent-anlegen.png",phase:"KI-Assistenten",title:"Rolle und Regeln festlegen",text:"Geben Sie Name und kurze Beschreibung ein. Beschreiben Sie unter «Rolle und Instruktionen» konkret, wobei der Assistent hilft, was er nicht tun soll und wie er antwortet. Beispielsweise: zuerst eine Rückfrage stellen, dann nur einen Hinweis geben und keine vollständige Lösung liefern."},
-  {image:"/screenshots/klp/fobizz/08-assistent-teilen.png",phase:"Im Unterricht einsetzen",title:"Assistent in ein Projekt teilen",text:"Öffnen Sie beim fertigen Assistenten «Teilen». Unter «Im Klassenraum» wählen Sie den Klassenraum und das gewünschte Projekt. So steht der Assistent den Schüler*innen innerhalb der zeitlich freigeschalteten Unterrichtsaktivität zur Verfügung."},
-];
-
-const absSick: Step[] = [
-  {image:"/screenshots/absenzen/sus-01-meine-absenzen.png",phase:"Intranet · Absenzen",title:"«Absenzenerfassung» öffnen",text:"Öffnen Sie im Intranet (in2.tam.ch) das Menü «Absenzen» → «Absenzenerfassung». Unter «Meine Absenzen» sehen Sie alle erfassten Absenzen mit Lektion, Datum, Kommentar und Absenzstatus. Über das blaue «+» erfassen Sie eine neue Absenz.",tip:"Unvorhersehbare Absenzen (z. B. Krankheit, Unfall, Verspätung) müssen Sie oder Ihre Erziehungsberechtigten vor Beginn der Lektion im Intranet erfassen."},
-  {image:"/screenshots/absenzen/sus-02-absenz-erfassen.png",phase:"Absenz erfassen",title:"Lektionen wählen und begründen",text:"Wählen Sie bei «Von» und «Bis» den Tag bzw. Zeitraum. Haken Sie alle Lektionen an, die Sie verpassen, und schreiben Sie unter «Begründung» in ganzen Sätzen, weshalb Sie fehlen. Klicken Sie anschliessend auf «Weiter». Klassenlehrperson, Fachlehrpersonen und Schulleitung werden automatisch informiert.",tip:"Wer den Unterricht wegen Krankheit frühzeitig verlässt, meldet sich ebenfalls vor der nächsten Lektion im Intranet ab. Ohne Eintrag gelten die Absenzen als unentschuldigt."},
-  {image:"/screenshots/absenzen/sus-01-meine-absenzen.png",phase:"Entschuldigen",title:"Innert 10 Unterrichtstagen entschuldigen",text:"Nach der Absenz unterschreiben Ihre Erziehungsberechtigten – bzw. Sie selbst, wenn Sie volljährig sind – das Entschuldigungsformular. Die Vorlage finden Sie im Intranet auf dem Dashboard unter «Meine Links» → «Absenzenformular» oder auf der SharePoint-Seite der Schule (Link unten). Senden Sie es innert 10 Unterrichtstagen digital (Mail oder Teams-Chat) an Ihre Klassenlehrperson. Diese setzt die Absenz danach auf «entschuldigt»; den Status sehen Sie in der Spalte «Absenzstatus».",tip:"Nicht rechtzeitig entschuldigte Absenzen werden automatisch unentschuldigt. Bei mehr als vier Tagen Abwesenheit oder einer verpassten Abschlussprüfung braucht es ein ärztliches Zeugnis."},
-  {image:"/screenshots/absenzen/sus-01-meine-absenzen.png",phase:"Regeln",title:"Sport, Prüfungen und Folgen von Absenzen",text:"Bei Unpässlichkeit im Sport melden Sie sich vor der Lektion bei der Sportlehrperson. Verpassten Stoff arbeiten Sie selbstständig nach; verpasste Prüfungen holen Sie in Absprache mit der Lehrperson zeitnah nach. Ab der dritten Verspätung pro Semester zählt jede weitere als unentschuldigte Absenz.",tip:"Ab 40 Absenzen im Semester oder 3 unentschuldigten Ereignissen führt die Klassenlehrperson ein Gespräch mit Ihnen. Die Absenzen werden semesterweise gezählt."},
-];
-
-const absJoker: Step[] = [
-  {image:"/screenshots/absenzen/sus-03-jokertage.png",phase:"Intranet · Jokertage",title:"«Jokertage» öffnen",text:"Öffnen Sie «Absenzen» → «Jokertage Schuljahr». Oben sehen Sie, wie viele Jokertage Sie beziehen dürfen (maximal 2 pro Schuljahr) und wie viele Anträge Sie bereits eingereicht haben. Mit «+» starten Sie einen neuen Antrag.",tip:"Jokertage gelten immer als ganzer Tag – auch wenn an diesem Tag nur ein Halbtag Unterricht stattfindet. Nicht bezogene Jokertage verfallen am Ende des Schuljahres."},
-  {image:"/screenshots/absenzen/sus-04-jokertag-antrag.png",phase:"Antrag",title:"Datum wählen und Sperrdaten beachten",text:"Wählen Sie das gewünschte Datum. Der Antrag muss mindestens 14 Kalendertage im Voraus eingereicht werden. An den aufgeführten Sperrdaten (z. B. Blockwochen, Studienhalbtage, gesamtschulische Sport-Veranstaltungen) sind keine Jokertage möglich.",tip:"Findet am gewünschten Tag eine angesagte Prüfung statt, melden Sie dies den betroffenen Lehrpersonen eine Woche vorher und vereinbaren Sie einen Termin zum Vor- oder Nachholen."},
-  {image:"/screenshots/absenzen/sus-04-jokertag-antrag.png",phase:"Einverständnis",title:"Einverständniserklärung hochladen und absenden",text:"Minderjährige laden über «Download Einverständniserklärung» das Formular herunter, lassen es von den Erziehungsberechtigten unterschreiben und laden es eingescannt hoch. Klicken Sie anschliessend auf «Absenden». «Entwurf speichern» sendet den Antrag noch nicht ab.",tip:"Die Schulleitung bewilligt Jokertage. Abgelehnt wird ein Antrag, wenn bereits zwei Jokertage bezogen wurden, der Tag ein Sperrtag ist, die Frist nicht eingehalten wurde oder die Unterschrift fehlt."},
-  {image:"/screenshots/absenzen/sus-03-jokertage.png",phase:"Status",title:"Entscheid in der Übersicht verfolgen",text:"Nach dem Absenden erhalten Sie Bescheid, ob der Antrag gutgeheissen wurde. In der Tabelle sehen Sie zu jedem Jokertag den aktuellen Status sowie Erstellungs- und Eingabedatum."},
-];
-
-const absDisp: Step[] = [
-  {image:"/screenshots/absenzen/sus-05-dispensation-1tag.png",phase:"Vorhersehbare Absenzen",title:"Richtige Gesuchsart wählen",text:"Für alle vorhersehbaren Abwesenheiten (z. B. Arzttermin, Fahrprüfung, Beerdigung, Militär, Studienberatung) braucht es ein Dispensationsgesuch. Unter «Absenzen» wählen Sie «Dispensationsgesuche bis 1 Tag» oder «Dispensationsgesuche mehr als 1 Tag».",tip:"Für Ferienverlängerungen wird kein Urlaub gewährt. In der Regel wird pro Schuljahr höchstens eine ganzwöchige Dispensation bewilligt."},
-  {image:"/screenshots/absenzen/sus-06-dispensation-typ.png",phase:"Neues Gesuch",title:"«Fach» oder «Zeitabschnitt» wählen",text:"Klicken Sie auf «+». Wählen Sie «Fach», wenn Sie nur einzelne Fächer verpassen, oder «Zeitabschnitt», wenn Sie einen bestimmten Zeitraum (einige Stunden oder ganze Tage) abwesend sind."},
-  {image:"/screenshots/absenzen/sus-07-dispensation-fach.png",phase:"Variante Fach",title:"Betroffene Fächer anhaken",text:"Bei «Fach» haken Sie alle Fächer an, die von der Abwesenheit betroffen sind, und wählen darunter Start- und Enddatum."},
-  {image:"/screenshots/absenzen/sus-09-dispensation-zeitabschnitt.png",phase:"Variante Zeitabschnitt",title:"Datum und Zeiten festlegen",text:"Bei «Zeitabschnitt» wählen Sie Start- und Enddatum sowie Start- und Endzeit. Mit «ganztags» gilt das Gesuch für den ganzen Tag; «wöchentlich» ist für regelmässig wiederkehrende Abwesenheiten gedacht."},
-  {image:"/screenshots/absenzen/sus-08-dispensation-formular.png",phase:"Begründung & Formular",title:"Grund wählen und Gesuch hochladen",text:"Wählen Sie unter «Begründung» den passenden Grund (z. B. «Arztbesuch / Physio», «Praktische Fahrprüfung», «Familiärer Anlass»). Laden Sie die «Vorlage Dispensationsgesuch» herunter, füllen Sie sie vollständig aus und lassen Sie sie unterschreiben – von Ihnen (volljährig) bzw. Ihren Erziehungsberechtigten sowie von der Klassenlehrperson. Laden Sie das Gesuch inkl. Beilagen (max. 1,5 MB) hoch und klicken Sie auf «Absenden».",tip:"Gesuche bis 1 Tag bewilligt die Klassenlehrperson (ausser in Blockwochen). Erfassen Sie sie möglichst frühzeitig. Sind Prüfungen betroffen, informieren Sie die Lehrpersonen direkt nach der Bewilligung."},
-  {image:"/screenshots/absenzen/sus-11-dispensation-mehrtage-formular.png",phase:"Mehr als 1 Tag",title:"Mindestens 14 Unterrichtstage im Voraus",text:"Gesuche für mehr als einen Tag erfassen Sie unter «Dispensationsgesuche mehr als 1 Tag» auf dieselbe Weise – spätestens 14 Unterrichtstage vor der Abwesenheit. Darüber entscheidet die Schulleitung nach Rücksprache mit der Klassenlehrperson.",tip:"Verspätete Gesuche müssen Sie persönlich dem zuständigen Schulleitungsmitglied vorlegen; ein Anspruch auf Behandlung besteht nicht. Verpassten Stoff arbeiten Sie selbstständig nach."},
-];
-
-const lpAttendance: Step[] = [
-  {image:"/screenshots/absenzen/lp-02-absenzenerfassung-lektion.png",phase:"Intranet · Absenzen",title:"Absenzen in der Lektion erfassen",text:"Öffnen Sie «Absenzen» → «Absenzenerfassung». Wählen Sie oben links den Kurs und in der Leiste darunter die Lektion («Heute» springt zum aktuellen Tag). Tragen Sie fehlende Schüler*innen in der Spalte «Absenz» und Verspätete in der Spalte «Verspätung» ein. Sind alle anwesend, bestätigen Sie die Lektion mit dem grünen Haken.",tip:"Am einfachsten erfassen Sie Absenzen direkt im Schulzimmer mit der App «IN2 Mobile» (QR-Codes unten); alternativ im Browser unter in2.tam.ch. Markieren Sie Lektionen mit einer Prüfung zusätzlich mit «Prüfungslektion».",in2Mobile:true},
-  {image:"/screenshots/absenzen/lp-03-absenzenerfassung-semester.png",phase:"Semesteransicht",title:"Präsenz im Semester überblicken",text:"Mit dem Schalter «Semester» oben rechts sehen Sie für den gewählten Kurs alle Lektionen des Semesters. Die Prozentzahl neben dem Namen zeigt die Präsenz; das «i»-Symbol markiert Lektionen mit Absenzen."},
-  {image:"/screenshots/absenzen/lp-04-unbestaetigte-lektionen.png",phase:"Kontrolle",title:"Unbestätigte Lektionen nachholen",text:"Unter «Stundenplan» → «Unbestätigte Lektionen» finden Sie alle Lektionen, deren Absenzenkontrolle noch nicht bestätigt ist. «Link zur Lektion» öffnet die Lektion direkt; mit «Lektion bestätigen» schliessen Sie die Kontrolle ab."},
-  {image:"/screenshots/absenzen/lp-05-absenzen-flp.png",phase:"Fachlehrperson",title:"Absenzen Ihrer Klassen auswerten",text:"«Absenzen» → «Absenzen meiner Klassen (FLP)» zeigt pro Klasse die Anzahl Absenzen im Semester. Die Spaltenkürzel bedeuten:",legend:[["X","Absenz offen"],["XE","Absenz entschuldigt"],["XU","Absenz unentschuldigt"],["V","Verspätung offen"],["VE","Verspätung entschuldigt"],["VU","Verspätung unentschuldigt"],["S","Absenz Schule (schulische Anlässe wie Theater, Chor, Orchester, Peer-Support)"],["J","Jokertag"],["D","Dispensation"]],tip:"Über das Zahnrad oben rechts lassen sich ausgewählte Zeilen per E-Mail versenden oder als Excel/CSV exportieren."},
-];
-
-const klpAbsences: Step[] = [
-  {image:"/screenshots/absenzen/lp-01-dashboard.png",phase:"Dashboard",title:"KLP-Ansichten im Dashboard",text:"Als Klassenlehrperson finden Sie im Dashboard unter «Meine Links» die wichtigsten Ansichten: «Absenzen meiner Klasse (KLP)», «Absenzen bei Prüfungen (KLP)», «Absenzen-Wochenübersicht (KLP)» und «Jokertage meiner Klasse (KLP)». Dieselben Seiten und der «Absenzen-Admin» liegen im Menü «Absenzen»."},
-  {image:"/screenshots/absenzen/klp-01-absenzen-meiner-klasse.png",phase:"Überblick",title:"Absenzen der Klasse im Semester",text:"«Absenzen meiner Klasse (KLP)» listet alle Schüler*innen mit der Anzahl Absenzen im gewählten Semester. Achten Sie besonders auf die Spalte X (offen) – diese Absenzen sind noch nicht entschuldigt – sowie auf XU und VU (unentschuldigt). Bekannter Fehler: Ein Klick auf einen Namen meldet zurzeit «Die Daten konnten nicht geladen werden» (Ticket beim DSC-ServicePortal ist erfasst). Nutzen Sie stattdessen die Wochen- oder Semesterübersicht.",tip:"Ab 40 Absenzen im Semester laden Sie die betroffene Person zu einem Absenzengespräch ein; die Schulleitung entscheidet danach über weitere Massnahmen."},
-  {image:"/screenshots/absenzen/klp-02-wochenuebersicht.png",phase:"Wochenübersicht",title:"Wochenübersicht der Klasse",text:"Die «Wochenübersicht» zeigt pro Schüler*in und Lektion den Status; links sind die Wochensummen zusammengefasst. Mit den Pfeilen wechseln Sie die Kalenderwoche. Die Kürzel bedeuten:",legend:[["x","Absenz offen"],["e","Absenz entschuldigt"],["u","Absenz unentschuldigt"],["S","Absenz Schule (schulische Anlässe wie Theater, Chor, Orchester, Peer-Support)"],["V","Verspätung offen"],["E","Verspätung entschuldigt"],["U","Verspätung unentschuldigt"]]},
-  {image:"/screenshots/absenzen/klp-07-absenzen-admin.png",phase:"Absenzen-Admin",title:"«Absenzen-Admin» öffnen",text:"Der «Absenzen-Admin» ist das wichtigste Werkzeug, um den Status von Absenzen zu ändern. Öffnen Sie «Absenzen» → «Absenzen-Admin». Sie sehen alle Schüler*innen Ihrer Klasse im gewählten Semester. Mit dem Pfeil ▸ links klappen Sie die Absenzen einer Person auf.",tip:"Die Schaltfläche «Absenzen generieren» oben rechts erstellt neue Absenzeinträge. Zum Entschuldigen brauchen Sie sie nicht."},
-  {image:"/screenshots/absenzen/klp-08-absenzen-admin-detail.png",phase:"Absenzen-Admin",title:"Absenzen einer Person prüfen",text:"Aufgeklappt sehen Sie jede verpasste Lektion einzeln. Die wichtigsten Spalten (in der Tabelle teilweise abgekürzt):",legendHead:["Spalte","Inhalt"],legend:[["Datum, Zeit","Tag und Lektion der Absenz"],["Lektion / Lehrperson","Betroffenes Fach und Lehrperson"],["Absenzgruppe","z. B. «Absenz»"],["Absenztyp","«Abwesend» oder «Abwesend (disp. Schule)»"],["Kommentar","Begründung aus der Absenzmeldung"],["Absenzstatus","abwesend (offen), entschuldigt oder unentschuldigt"],["erstellt durch","Wer den Eintrag erfasst oder geändert hat"]]},
-  {image:"/screenshots/absenzen/klp-09-absenzen-admin-bearbeiten.png",phase:"Status ändern",title:"Absenzen entschuldigen mit «Bearbeiten»",text:"Haken Sie die betroffenen Lektionen an (das Kästchen oben wählt alle aus) und klicken Sie auf «Bearbeiten». Im Fenster «Einträge anpassen» wählen Sie Typ und Status und bestätigen mit «Update».",legendHead:["Auswahl","Bedeutung"],legend:[["Abwesend","Normale Absenz"],["Abwesend (disp. Schule)","Absenz Schule «S», z. B. Chor, Theater, Orchester, Peer-Support"],["abwesend","Status offen (noch nicht entschuldigt)"],["entschuldigt","Entschuldigungsformular liegt vor"],["unentschuldigt","Frist verpasst oder keine Entschuldigung"]],tip:"Die Erziehungsberechtigten bzw. volljährigen Schüler*innen senden das Entschuldigungsformular innert 10 Unterrichtstagen per Mail oder Teams-Chat. Setzen Sie die Absenzen innerhalb dieser Frist; danach werden offene Absenzen automatisch unentschuldigt."},
-  {image:"/screenshots/absenzen/klp-04-absenz-status-setzen.png",phase:"Alternative",title:"Status in der Semesterübersicht setzen",text:"Für einzelne Tage geht es auch direkt in der «Semesterübersicht»: Klicken Sie beim entsprechenden Tag auf das «i». Im Fenster sehen Sie alle Lektionen dieses Tages und setzen den Status pro Lektion. Die Schaltflächen bedeuten:",legend:[["x","Absenz offen (noch nicht entschuldigt)"],["e","Absenz entschuldigt"],["u","Absenz unentschuldigt"],["S","Absenz Schule (schulische Anlässe wie Theater, Chor, Orchester, Peer-Support; erscheint nicht in den normalen Absenzenberichten)"],["🗑","Absenzeintrag löschen"]]},
-  {image:"/screenshots/absenzen/klp-01-absenzen-meiner-klasse.png",phase:"Massnahmen",title:"Bei unentschuldigten Absenzen handeln",text:"Hat eine Person im Semester 3 unentschuldigte Ereignisse (zusammenhängende Absenzen), führen Sie ein Gespräch, halten Situation und Massnahmen fest und informieren Schulleitung und Erziehungsberechtigte. Bleibt eine Verbesserung aus, folgt ein Gespräch mit der Schulleitung.",tip:"Unentschuldigte Absenzen kann nachträglich nur die Schulleitung beim Vorliegen besonderer Gründe entschuldigen."},
-];
-
-const klpDisp: Step[] = [
-  {image:"/screenshots/absenzen/klp-05-disp-jokertage-klasse.png",phase:"Dispensationen",title:"Gesuche Ihrer Klasse im Überblick",text:"«Absenzen» → «Disp/Jokertage meiner Klassen KLP» listet alle Dispensationsgesuche Ihrer Klasse mit Zeitraum, Status (z. B. «Genehmigt», «Abgelehnt»), Art des Gesuchs und Begründung.",tip:"Über das Zahnrad lassen sich ausgewählte Einträge per E-Mail versenden oder als Excel/CSV exportieren."},
-  {image:"/screenshots/absenzen/klp-05-disp-jokertage-klasse.png",phase:"Ihre Rolle",title:"Dispensationsgesuche beurteilen",text:"Das Gesuchsformular braucht Ihre Unterschrift, bevor die Schülerin oder der Schüler es hochlädt. Beurteilen Sie es vorgängig unter schulischen, persönlichen und disziplinarischen Aspekten. Gesuche bis 1 Tag bewilligen Sie (ausser in Blockwochen): Sie erhalten dazu eine automatisch generierte E-Mail und bewilligen das Gesuch über den Link darin. Über längere Gesuche entscheidet die Schulleitung nach Rücksprache mit Ihnen.",tip:"Gültige Gründe sind u. a. Feiertage, besondere Familienereignisse, Umzug, Militär/Zivildienst, unumgängliche Arzttermine, Fahrprüfung, Info-Veranstaltungen und Schnupperlehren. Für Ferienverlängerungen gibt es keine Dispensation."},
-  {image:"/screenshots/absenzen/klp-06-jokertage-klasse.png",phase:"Jokertage",title:"Jokertage der Klasse einsehen",text:"«Jokertage meiner Schüler KLP» zeigt, wer an welchem Datum einen Jokertag bezieht. Jokertage bewilligt die Schulleitung; als Klassenlehrperson behalten Sie hier den Überblick, z. B. bei Prüfungsterminen."},
-];
-
-const guideNames: Record<GuideKey,string> = {eduzh:"EduZH-Erstlogin",eduzhNoPhone:"EduZH-Erstlogin (ohne Smartphone)",ugWorkflow:"Untergymnasium",kgWorkflow:"Kurzzeitgymnasium / HMS",officeMobile:"Office 365 auf dem Smartphone",intranetMobile:"Intranet",wlan:"WLAN verbinden",kgIntranet:"Intranet",printer:"Drucker & Kopierer",apps:"BYOD-Software installieren",profile:"Steckbrief-Challenge",challenge:"Window-Management-Challenge",shortcuts:"Shortcut-Challenge",peerSupport:"Drucker-Installation (BYOD)",beamerAirserver:"Beamer & AirServer",klpCalendar:"Schulkalender abonnieren",klpFobizz:"fobizz im Unterricht",absSick:"Absenz melden & entschuldigen",absJoker:"Jokertag beantragen",absDisp:"Dispensation beantragen",lpAttendance:"Absenzenkontrolle im Unterricht",klpAbsences:"Absenzen der Klasse (KLP)",klpDisp:"Dispensationen & Jokertage (KLP)"};
 const guidePaths: Record<GuideKey,string> = {eduzh:"/eduzh",eduzhNoPhone:"/eduzh-ohne-handy",ugWorkflow:"/untergymnasium",kgWorkflow:"/kurzzeitgymnasium-hms",officeMobile:"/ug/office-365-smartphone",intranetMobile:"/ug/intranet-smartphone",wlan:"/wlan",kgIntranet:"/kg/intranet",printer:"/kg/drucker-kopierer",apps:"/microsoft-365",profile:"/challenges/steckbrief",challenge:"/challenges/window-management",shortcuts:"/challenges/shortcuts",peerSupport:"/lehrpersonen/drucker-installation",beamerAirserver:"/lehrpersonen/beamer-airserver",klpCalendar:"/lehrpersonen/schulkalender",klpFobizz:"/lehrpersonen/fobizz",absSick:"/absenzen-sus/absenz-melden",absJoker:"/absenzen-sus/jokertag",absDisp:"/absenzen-sus/dispensation",lpAttendance:"/absenzen-lp/absenzenkontrolle",klpAbsences:"/absenzen-lp/klasse",klpDisp:"/absenzen-lp/dispensationen-jokertage"};
 const pathGuides: Record<string,GuideKey> = {
   ...Object.fromEntries(Object.entries(guidePaths).map(([key,path])=>[path,key])),
@@ -308,31 +41,6 @@ const pathGuides: Record<string,GuideKey> = {
   "/klp/schulkalender": "klpCalendar",
   "/klp/fobizz": "klpFobizz"
 } as Record<string,GuideKey>;
-const guideDescriptions: Record<GuideKey, string> = {
-  eduzh: "Ersteinrichtung des EduZH-Kontos und Kopplung der Microsoft Authenticator App für die Zwei-Faktor-Authentifizierung.",
-  eduzhNoPhone: "Ersteinrichtung des EduZH-Kontos ohne Smartphone mittels USB-Hauptschlüssel (FIDO2 / YubiKey) im Browser am Schullaptop.",
-  ugWorkflow: "Ablauf der IKT-Einführung für Schüler*innen des Untergymnasiums am Schul-Computer.",
-  kgWorkflow: "Ablauf der IKT-Einführung für Schüler*innen des Kurzzeitgymnasiums und der HMS am eigenen BYOD-Gerät.",
-  officeMobile: "Installation und Konfiguration der Microsoft 365 Apps (Outlook, Teams, OneDrive) auf dem Smartphone.",
-  intranetMobile: "Einrichtung des Intranet-Zugangs (in2.tam.ch) und der IN2 Mobile App auf dem Smartphone.",
-  wlan: "Einrichtung des verschlüsselten Schul-WLANs (KTZH-S) auf Windows-PCs und MacBooks.",
-  kgIntranet: "Zugang zum Schulintranet, Stundenplan, Absenzenverwaltung und digitalen Services am Laptop.",
-  printer: "Einführung in das Drucksystem: Druckaufträge über Pixio erstellen, Badge verknüpfen und abholen.",
-  apps: "Anleitungen zur Installation der erforderlichen Schul-Software und Programme für BYOD-Geräte.",
-  profile: "Erstellung und Gestaltung des eigenen Steckbrief-Kurzprofils mit der offiziellen Word-Vorlage.",
-  challenge: "Training von Tastaturkürzeln zur schnellen Fensteranordnung (Tiling / Snap Layouts) unter Windows und macOS.",
-  shortcuts: "Interaktives Shortcut-Training für schnelles Navigieren im Browser, Dateimanager und in Editoren.",
-  peerSupport: "Installation der persönlichen Follow-Me Druckerwarteschlange (FDU) auf Windows-PCs und MacBooks zum direkten Drucken aus Programmen.",
-  beamerAirserver: "Schritt-für-Schritt Anleitung zur Bedienung der Medientechnik im Unterrichtsraum: Beamer, Audio/Video-Anlage, Monitor und drahtloser AirServer.",
-  klpCalendar: "Automatisches Abonnement des Schulkalenders in Outlook, Google Kalender oder Apple Kalender zur Synchronisation aller Termine.",
-  klpFobizz: "Erstellung digitaler Klassenräume, Verwaltung anonymer Schüler-Zugangscodes und Einsatz eigener KI-Assistenten im Unterricht.",
-  absSick: "Krankheit, Unfall oder Verspätung vor der Lektion im Intranet erfassen und innert 10 Unterrichtstagen entschuldigen.",
-  absJoker: "Einen der zwei Jokertage pro Schuljahr mindestens 14 Kalendertage im Voraus im Intranet beantragen.",
-  absDisp: "Vorhersehbare Abwesenheiten bis 1 Tag oder über mehrere Tage mit einem Dispensationsgesuch beantragen.",
-  lpAttendance: "Absenzen und Verspätungen pro Lektion erfassen, Lektionen bestätigen und die Absenzen Ihrer Klassen auswerten.",
-  klpAbsences: "Absenzen der eigenen Klasse überwachen, im Absenzen-Admin auf entschuldigt setzen und bei Häufungen Massnahmen einleiten.",
-  klpDisp: "Dispensationsgesuche beurteilen und die Dispensationen und Jokertage der Klasse im Blick behalten."
-};
 
 const absenceGuides: GuideKey[] = ["absSick","absJoker","absDisp","lpAttendance","klpAbsences","klpDisp"];
 
@@ -345,34 +53,38 @@ const navigationGroups: { number: string; title: string; subtitle: string; path:
   {number:"B",title:"Absenzen LP",subtitle:"Absenzenkontrolle für Lehrpersonen & Klassenlehrpersonen",path:"/absenzen-lp",guides:["lpAttendance","klpAbsences","klpDisp"]},
 ];
 
-function getGuideSteps(key: GuideKey, computer: "windows" | "mac", phone: "iphone" | "android"): Step[] {
+function getGuideListKey(key: GuideKey, computer: "windows" | "mac", phone: "iphone" | "android"): string {
   switch (key) {
-    case "eduzh": return phone === "android" ? eduzhAndroid : eduzhIphone;
-    case "eduzhNoPhone": return eduzhNoPhone;
-    case "ugWorkflow": return ugWorkflow;
-    case "kgWorkflow": return kgWorkflow;
-    case "officeMobile": return phone === "android" ? officeMobileAndroid : officeMobileIphone;
-    case "intranetMobile": return intranetMobile;
-    case "kgIntranet": return kgIntranet;
-    case "printer": return printer;
-    case "apps": return apps;
-    case "beamerAirserver": return beamerAirserver;
-    case "peerSupport": return computer === "windows" ? peerSupportWindows : peerSupportMac;
-    case "profile": return profile;
-    case "klpCalendar": return klpCalendar;
-    case "klpFobizz": return klpFobizz;
-    case "absSick": return absSick;
-    case "absJoker": return absJoker;
-    case "absDisp": return absDisp;
-    case "lpAttendance": return lpAttendance;
-    case "klpAbsences": return klpAbsences;
-    case "klpDisp": return klpDisp;
-    case "wlan": return computer === "windows" ? wlanWindows : wlanMac;
-    case "challenge": return computer === "windows" ? challengeWindows : challengeMac;
-    case "shortcuts": return computer === "windows" ? shortcutsWindows : shortcutsMac;
-    default: return eduzhIphone;
+    case "eduzh": return phone === "android" ? "eduzhAndroid" : "eduzhIphone";
+    case "eduzhNoPhone": return "eduzhNoPhone";
+    case "ugWorkflow": return "ugWorkflow";
+    case "kgWorkflow": return "kgWorkflow";
+    case "officeMobile": return phone === "android" ? "officeMobileAndroid" : "officeMobileIphone";
+    case "intranetMobile": return "intranetMobile";
+    case "kgIntranet": return "kgIntranet";
+    case "printer": return "printer";
+    case "apps": return "apps";
+    case "beamerAirserver": return "beamerAirserver";
+    case "peerSupport": return computer === "windows" ? "peerSupportWindows" : "peerSupportMac";
+    case "profile": return "profile";
+    case "klpCalendar": return "klpCalendar";
+    case "klpFobizz": return "klpFobizz";
+    case "absSick": return "absSick";
+    case "absJoker": return "absJoker";
+    case "absDisp": return "absDisp";
+    case "lpAttendance": return "lpAttendance";
+    case "klpAbsences": return "klpAbsences";
+    case "klpDisp": return "klpDisp";
+    case "wlan": return computer === "windows" ? "wlanWindows" : "wlanMac";
+    case "challenge": return computer === "windows" ? "challengeWindows" : "challengeMac";
+    case "shortcuts": return computer === "windows" ? "shortcutsWindows" : "shortcutsMac";
+    default: return "eduzhIphone";
   }
 }
+function getGuideSteps(key: GuideKey, computer: "windows" | "mac", phone: "iphone" | "android", L: Lists): Step[] {
+  return L[getGuideListKey(key, computer, phone)] || [];
+}
+
 
 export default function Home() {
   const [intro,setIntro]=useState(true);
@@ -386,11 +98,24 @@ export default function Home() {
   const [qrOpen,setQrOpen]=useState(false);
   const [headerHidden,setHeaderHidden]=useState(false);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
-  const steps=useMemo(()=>absenceGuides.includes(guide)?getGuideSteps(guide,computer,phone):guide==="eduzh"?(phone==="android"?eduzhAndroid:eduzhIphone):guide==="eduzhNoPhone"?eduzhNoPhone:guide==="ugWorkflow"?ugWorkflow:guide==="kgWorkflow"?kgWorkflow:guide==="officeMobile"?(phone==="android"?officeMobileAndroid:officeMobileIphone):guide==="intranetMobile"?intranetMobile:guide==="kgIntranet"?kgIntranet:guide==="printer"?printer:guide==="apps"?apps:guide==="beamerAirserver"?beamerAirserver:guide==="peerSupport"?(computer==="windows"?peerSupportWindows:peerSupportMac):guide==="profile"?profile:guide==="klpCalendar"?klpCalendar:guide==="klpFobizz"?klpFobizz:guide==="wlan"?(computer==="windows"?wlanWindows:wlanMac):guide==="challenge"?(computer==="windows"?challengeWindows:challengeMac):(computer==="windows"?shortcutsWindows:shortcutsMac),[guide,computer,phone]);
+  const [content,setContent]=useState<Content>(bundledContent);
+  useEffect(()=>{fetch(CONTENT_URL,{cache:"no-store"}).then(r=>r.ok?r.json():null).then(saved=>{if(saved)setContent(mergeContent(bundledContent,saved))}).catch(()=>{})},[]);
+  const lists=useMemo<Lists>(()=>Object.fromEntries(Object.entries(content.lists).map(([k,v])=>[k,v.steps])),[content]);
+  const guideNames=useMemo(()=>Object.fromEntries(Object.entries(content.guides).map(([k,v])=>[k,v.name])) as Record<GuideKey,string>,[content]);
+  const guideDescriptions=useMemo(()=>Object.fromEntries(Object.entries(content.guides).map(([k,v])=>[k,v.description])) as Record<GuideKey,string>,[content]);
+  const steps=useMemo(()=>getGuideSteps(guide,computer,phone,lists),[guide,computer,phone,lists]);
   const step=steps[current]||steps[0];
   const image=step.image;
   const desktopAppGuide=["intranetMobile","kgIntranet","printer","klpCalendar","klpFobizz","beamerAirserver",...absenceGuides].includes(guide);
-  const pdfHref=guide==="eduzh"?`/pdfs/eduzh-${phone}.pdf`:guide==="eduzhNoPhone"?"/pdfs/eduzh-ohne-handy.pdf":guide==="wlan"?`/pdfs/wlan-${computer==="mac"?"macos":"windows"}.pdf`:guide==="apps"?"/pdfs/microsoft-365.pdf":guide==="profile"?"/pdfs/steckbrief-challenge.pdf":guide==="challenge"?`/pdfs/window-management-${computer==="mac"?"macos":"windows"}.pdf`:guide==="shortcuts"?`/pdfs/shortcut-challenge-${computer==="mac"?"macos":"windows"}.pdf`:guide==="peerSupport"?`/downloads/Anleitung_BYOD_Printing_${computer==="mac"?"macOS":"Windows"}.pdf`:guide==="beamerAirserver"?"/downloads/anleitung-beamer-unterrichtsraum.pdf":null;
+  const listKey=getGuideListKey(guide,computer,phone);
+  const list=content.lists[listKey];
+  const pdfHref=list?.pdf||null;
+  const finish=list?.finish||{};
+  const visual=list?.visual||{};
+  const withMarks=(t:string)=>t.split(/(__[^_]+__)/).map((part,k)=>part.startsWith("__")&&part.endsWith("__")?<u key={k}>{part.slice(2,-2)}</u>:part);
+  const guideTarget=(key:string)=>({href:guidePaths[key as GuideKey]||"/",onClick:(e:React.MouseEvent)=>{e.preventDefault();if(guidePaths[key as GuideKey])openGuide(key as GuideKey)}});
+  const linkProps=(l:{href?:string;guide?:string})=>l.guide?guideTarget(l.guide):{href:l.href,target:"_blank",rel:"noreferrer"};
+  const withCode=(t:string)=>t.split(/(`[^`]+`)/).map((part,k)=>part.startsWith("`")&&part.endsWith("`")?<code key={k}>{part.slice(1,-1)}</code>:part);
   const openCategoryGroup=(path:string,updateUrl=true)=>{const grp=navigationGroups.find(g=>g.path===path||g.path===path.replace(/\/$/,""));if(grp){setIntro(false);setCategoryGroup(grp.number);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",grp.path);window.scrollTo({top:0,behavior:"smooth"});}};
   const openGuide=(key:GuideKey,updateUrl=true)=>{setIntro(false);setCategoryGroup(null);setGuide(key);setCurrent(0);setMenu(false);setZoom(false);if(updateUrl)window.history.pushState({},"",guidePaths[key]);window.scrollTo({top:0,behavior:"smooth"});};
   const go=(n:number)=>{setCurrent(Math.max(0,Math.min(n,steps.length-1)));window.scrollTo({top:0,behavior:"smooth"});};
@@ -497,113 +222,41 @@ export default function Home() {
 
     <section className={`guide ${!image?"challenge-guide":""} ${desktopAppGuide?"desktop-app-guide":""}`} id="top" onPointerDown={e=>{if((e.target as HTMLElement).closest("button,a,details"))return;swipeStart.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerUp={finishSwipe} onPointerCancel={()=>{swipeStart.current=null}}>
       <div className={`visual-wrap ${image?.toLowerCase().endsWith(".png")?"png-visual":""}`}>
-        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:step.in2Mobile?<div className="in2-visual"><small>IN2 MOBILE</small><b>App installieren</b><span>iPhone oder Android</span></div>:step.flow?<div className={`flow-visual ${guide==="ugWorkflow"?"workflow-loop ug-loop":guide==="kgWorkflow"?"workflow-loop kg-loop":""}`}><small>{guide==="peerSupport"?"ABLAUF · ANLEITUNG":"START-ABLAUF"}</small>{step.flow.map((item,index)=>{const repeats=guide==="ugWorkflow"?index>=2:guide==="kgWorkflow"?index>=1:false;const startsRepeat=guide==="ugWorkflow"?index===2:guide==="kgWorkflow"?index===1:false;return <div key={item} className={repeats?"repeat-step":""}>{startsRepeat&&<em>Für jede weitere Aufgabe</em>}<span>{String(index+1).padStart(2,"0")}</span><b>{item}{guide==="kgWorkflow"&&index===3&&<> <u>in Moodle</u></>}</b>{index<step.flow!.length-1&&<i>↓</i>}</div>})}{guide==="ugWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 03 beginnen</p>}{guide==="kgWorkflow"&&<p className="repeat-note">↻ Danach wieder bei Schritt 02 beginnen</p>}</div>:<div className="challenge-card"><small>{guide==="peerSupport"?"PEER-SUPPORTER":guide==="apps"||guide==="profile"?"KG / HMS":computer==="windows"?"WINDOWS":"macOS"}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{guide==="apps"?"VORAUSSETZUNG":guide==="profile"?"STECKBRIEF · KURZPROFIL":guide==="shortcuts"?"SHORTCUT TRAINING":guide==="peerSupport"?"PEER-SUPPORTER · MACOS PRINT":"WINDOW MANAGEMENT · KG / HMS"}</p></div>}
+        {image?<button className="screenshot" onClick={()=>setZoom(true)} aria-label="Screenshot vergrössern"><img src={image} alt={`Screenshot zu ${step.title}`}/><span className="zoom-label">＋ Vergrössern</span></button>:step.in2Mobile?<div className="in2-visual"><small>IN2 MOBILE</small><b>App installieren</b><span>iPhone oder Android</span></div>:step.flow?<div className={`flow-visual ${visual.loop?`workflow-loop ${visual.loop}-loop`:""}`}><small>{visual.flowLabel||"ABLAUF"}</small>{step.flow.map((item,index)=>{const repeats=!!visual.repeatFrom&&index+1>=visual.repeatFrom;const startsRepeat=!!visual.repeatFrom&&index+1===visual.repeatFrom;return <div key={item} className={repeats?"repeat-step":""}>{startsRepeat&&visual.repeatTitle&&<em>{visual.repeatTitle}</em>}<span>{String(index+1).padStart(2,"0")}</span><b>{withMarks(item)}</b>{index<step.flow!.length-1&&<i>↓</i>}</div>})}{visual.repeatNote&&<p className="repeat-note">{visual.repeatNote}</p>}</div>:<div className="challenge-card"><small>{visual.cardLabel}</small><span>{String(current+1).padStart(2,"0")}</span><b>{step.shortcut|| (current===steps.length-1?"✓":"GO")}</b><p>{visual.cardFooter}</p></div>}
         <div className="swipe-hint">{image?"Screenshot antippen zum Vergrössern":"Praxisaufgabe am eigenen BYOD-Gerät"}</div>
       </div>
       <article className="instruction">
         <div className="step-label"><span>Schritt {String(current+1).padStart(2,"0")}</span><i/>{step.phase}</div>
         <h2>{step.title}</h2><p>{step.text}</p>
         {step.legend&&<table className="legend-table"><thead><tr><th>{step.legendHead?.[0]??"Kürzel"}</th><th>{step.legendHead?.[1]??"Bedeutung"}</th></tr></thead><tbody>{step.legend.map(([code,label])=><tr key={code}><td>{code}</td><td>{label}</td></tr>)}</tbody></table>}
-        {(guide==="ugWorkflow"||guide==="kgWorkflow")&&<section className="workflow-launch" aria-label="Moodle starten"><div className="browser-launch"><p><strong>1. Browser öffnen</strong><span>{guide==="ugWorkflow"?"Am Schul-Computer Microsoft Edge öffnen.":"Auf Ihrem Laptop einen Browser Ihrer Wahl öffnen, z. B. Edge, Chrome oder Safari."}</span></p></div><a href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer"><b>2. Moodle öffnen</b><span>Diese Adresse eintippen:</span><code>moodle.kst-fdu.ch</code><span className="moodle-hint">Login-Hinweis: Nutzen Sie den Button «EduZH-Login» unterhalb der beiden Felder für Benutzername und Passwort.</span><span>Aufgabenliste «IKT-Einführung» ↗</span></a></section>}
+        {step.launch&&<section className="workflow-launch" aria-label="Moodle starten"><div className="browser-launch"><p><strong>{step.launch.browserTitle}</strong><span>{step.launch.browserText}</span></p></div><a href={step.launch.href} target="_blank" rel="noreferrer"><b>{step.launch.title}</b>{step.launch.intro&&<span>{step.launch.intro}</span>}{step.launch.code&&<code>{step.launch.code}</code>}{step.launch.hint&&<span className="moodle-hint">{step.launch.hint}</span>}{step.launch.label&&<span>{step.launch.label}</span>}</a></section>}
         {(guide==="eduzh"&&current===0||guide==="officeMobile"&&current===0)&&<div className="device-picker"><button className={phone==="iphone"?"selected":""} onClick={()=>setPhone("iphone")}><b>iPhone</b><span>App Store</span></button><button className={phone==="android"?"selected":""} onClick={()=>setPhone("android")}><b>Android</b><span>Google Play</span></button></div>}
-        {guide==="eduzh"&&current===0&&<aside className="tip" style={{marginTop:"10px"}}><strong>Kein Smartphone vorhanden?</strong> Sie können Ihr Konto auch am Schullaptop ohne Smartphone einrichten: <a href={guidePaths.eduzhNoPhone} onClick={e=>{e.preventDefault();openGuide("eduzhNoPhone")}}>Zur Anleitung Erstlogin ohne Smartphone (USB-Key) ↗</a></aside>}
-        {guide==="eduzh"&&phone==="iphone"&&step.existingImage&&<details className="alternate-path"><summary>Authenticator enthält bereits Konten?</summary><p>{step.existingText}</p><div><figure><img src={step.existingImage} alt="Im Authenticator auf das Pluszeichen tippen"/><figcaption>1. Oben rechts auf «+» tippen</figcaption></figure><figure><img src={step.existingImage2} alt="Geschäfts- oder Schulkonto und danach Anmelden wählen"/><figcaption>2. Schulkonto und «Anmelden» wählen</figcaption></figure></div></details>}
+        {step.callout&&<aside className="tip" style={{marginTop:"10px"}}>{step.callout.title&&<strong>{step.callout.title}</strong>} {step.callout.text} {step.callout.label&&<a {...linkProps(step.callout)}>{step.callout.label}</a>}</aside>}
+        {step.existingImage&&<details className="alternate-path"><summary>{step.existingSummary||"Alternative"}</summary><p>{step.existingText}</p><div><figure><img src={step.existingImage} alt={step.existingCaption1||""}/><figcaption>{step.existingCaption1}</figcaption></figure>{step.existingImage2&&<figure><img src={step.existingImage2} alt={step.existingCaption2||""}/><figcaption>{step.existingCaption2}</figcaption></figure>}</div></details>}
         {(guide==="wlan"||guide==="challenge"||guide==="shortcuts"||guide==="peerSupport")&&<div className="device-picker"><button className={computer==="windows"?"selected":""} onClick={()=>setComputer("windows")}><b>Windows</b><span>PC</span></button><button className={computer==="mac"?"selected":""} onClick={()=>setComputer("mac")}><b>macOS</b><span>MacBook</span></button></div>}
         {step.tip&&<aside className="tip"><strong>Gut zu wissen</strong>{step.tip}</aside>}
-        {guide==="eduzhNoPhone"&&current===0&&<a className="byod-link" href="https://www.galaxus.ch/de/s1/product/yubico-key-c-nfc-notebook-security-20667831" target="_blank" rel="noreferrer">Beispiel-Gerät auf Galaxus anzeigen (Yubico Key C NFC) ↗</a>}
-        {guide==="eduzhNoPhone"&&(current===1||current===2)&&<a className="byod-link" href="https://mysignins.microsoft.com/security-info" target="_blank" rel="noreferrer">Microsoft Sicherheits-Info öffnen (mysignins.microsoft.com) ↗</a>}
-        {guide==="absSick"&&current===2&&<a className="byod-link" href="https://eduzh.sharepoint.com/sites/bi-mba-2250-su" target="_blank" rel="noreferrer">Entschuldigungsformular auf SharePoint öffnen ↗</a>}
-        {absenceGuides.includes(guide)&&current===0&&<a className="byod-link" href="https://in2.tam.ch" target="_blank" rel="noreferrer">Intranet öffnen (in2.tam.ch) ↗</a>}
-        {(guide==="intranetMobile"||guide==="kgIntranet")&&(current===0||current===1)&&<a className="byod-link" href="https://in2.tam.ch" target="_blank" rel="noreferrer">Intranet öffnen (in2.tam.ch) ↗</a>}
-        {guide==="apps"&&current===0&&<a className="byod-link" href="https://cyrilblum.github.io/KSTFDue/" target="_blank" rel="noreferrer">BYOD-Installationsanleitungen öffnen ↗</a>}
-        {guide==="printer"&&current===3&&<a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">https://pixio.triboni.net/triboni/oauth2/pix1/edu/init? ↗</a>}
-        {guide==="peerSupport"&&current===0&&computer==="mac"&&<div className="peer-download-container">
-          <div className="peer-download-header">
-            <strong>Erforderliche Downloads (macOS)</strong>
-            <span>Beide Dateien vor dem Ausführen im selben Ordner speichern:</span>
-          </div>
-          <div className="peer-download-cards">
-            <a className="peer-dl-card sh-card" href="/downloads/macOS-Printer-Connect.sh" download>
-              <div className="peer-dl-info">
-                <span className="peer-dl-tag">SHELL-SKRIPT · 1.4 KB</span>
-                <strong>macOS-Printer-Connect.sh</strong>
-                <small>Einrichtungsskript für Terminal ↓</small>
-              </div>
-            </a>
-            <a className="peer-dl-card pkg-card" href="/downloads/HewlettPackardPrinterDrivers.pkg" download>
-              <div className="peer-dl-info">
-                <span className="peer-dl-tag">TREIBERPAKET · 263 MB</span>
-                <strong>HewlettPackardPrinterDrivers.pkg</strong>
-                <small>HP Druckertreiber für macOS ↓</small>
-              </div>
-            </a>
-          </div>
-          <div className="peer-quick-links">
-            <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_macOS.pdf" target="_blank" rel="noreferrer">
-              PDF-Anleitung Drucker ↗
-            </a>
-            <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
-              Pixio Web-App öffnen ↗
-            </a>
-          </div>
+        {(step.links||[]).filter(l=>l.style!=="next").map((l,k)=>{
+          const style=l.style||"link";
+          if(style==="pdf")return <a key={k} className="peer-pdf" {...linkProps(l)}>{l.tag&&<span>{l.tag}</span>}<strong>{l.label} ↗</strong>{l.note&&<small>{l.note}</small>}</a>;
+          if(style==="download")return <a key={k} className="template-download" href={l.href} download>{l.label} ↓</a>;
+          if(style==="further")return <a key={k} className="further-tasks" {...linkProps(l)}>{l.label} ↗</a>;
+          const a=<a key={k} className="byod-link" {...linkProps(l)}>{l.label}{l.guide?" →":" ↗"}</a>;
+          return l.boxed?<div key={k} className="peer-step-box">{a}</div>:a;
+        })}
+        {step.downloads&&<div className="peer-download-container">
+          <div className="peer-download-header">{step.downloads.title&&<strong>{step.downloads.title}</strong>}{step.downloads.text&&<span>{step.downloads.text}</span>}</div>
+          <div className="peer-download-cards">{step.downloads.items.map((d,k)=><a key={k} className={`peer-dl-card ${d.kind||"zip"}-card`} href={d.href} download><div className="peer-dl-info">{d.tag&&<span className="peer-dl-tag">{d.tag}</span>}<strong>{d.name}</strong>{d.note&&<small>{d.note}</small>}</div></a>)}</div>
+          {!!step.downloads.links?.length&&<div className="peer-quick-links">{step.downloads.links.map((l,k)=><a key={k} className="peer-quick-link" href={l.href} target="_blank" rel="noreferrer">{l.label}</a>)}</div>}
         </div>}
-        {guide==="peerSupport"&&current===0&&computer==="windows"&&<div className="peer-download-container">
-          <div className="peer-download-header">
-            <strong>Erforderliche Downloads (Windows)</strong>
-            <span>Archiv herunterladen und vor dem Start entpacken:</span>
-          </div>
-          <div className="peer-download-cards">
-            <a className="peer-dl-card zip-card" href="/downloads/Win-Printer-Connect.zip" download>
-              <div className="peer-dl-info">
-                <span className="peer-dl-tag">ZIP-ARCHIV · 31 MB</span>
-                <strong>Win-Printer-Connect.zip</strong>
-                <small>Batch-Skript & HP Treiber für Windows ↓</small>
-              </div>
-            </a>
-          </div>
-          <div className="peer-quick-links">
-            <a className="peer-quick-link" href="/downloads/Anleitung_BYOD_Printing_Windows.pdf" target="_blank" rel="noreferrer">
-              PDF-Anleitung Drucker ↗
-            </a>
-            <a className="peer-quick-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">
-              Pixio Web-App öffnen ↗
-            </a>
-          </div>
+        {step.terminal&&<div className="terminal-box">
+          <div className="terminal-header"><div className="terminal-dots"><span/><span/><span/></div><span>{step.terminal.title}</span></div>
+          <div className="terminal-body">{step.terminal.lines.map((t,k)=><div key={k} className="terminal-line"><span className="prompt">{t.prompt||"$"}</span> <code>{t.code}</code></div>)}</div>
+          {step.terminal.note&&<div className="terminal-footer"><p>{step.terminal.noteTitle&&<strong>{step.terminal.noteTitle}</strong>} {withCode(step.terminal.note)}</p></div>}
         </div>}
-        {guide==="peerSupport"&&current===1&&<div className="peer-step-box"><a className="byod-link" href="https://pixio.triboni.net/triboni/oauth2/pix1/edu/init?" target="_blank" rel="noreferrer">Pixio Web-Portal öffnen (pixio.triboni.net) ↗</a></div>}
-        {guide==="peerSupport"&&current===2&&computer==="mac"&&<div className="terminal-box">
-          <div className="terminal-header">
-            <div className="terminal-dots"><span/><span/><span/></div>
-            <span>macOS Terminal — zsh</span>
-          </div>
-          <div className="terminal-body">
-            <div className="terminal-line"><span className="prompt">$</span> <code>chmod +x macOS-Printer-Connect.sh</code></div>
-            <div className="terminal-line"><span className="prompt">$</span> <code>./macOS-Printer-Connect.sh</code></div>
-          </div>
-          <div className="terminal-footer">
-            <p><strong>Funktionsweise:</strong> Prüft HP-Treiber &rarr; installiert <code>HewlettPackardPrinterDrivers.pkg</code> via <code>sudo installer</code> &rarr; richtet Drucker mit <code>lpadmin</code> ein (A4, Follow-Me Finisher).</p>
-          </div>
-        </div>}
-        {guide==="peerSupport"&&current===2&&computer==="windows"&&<div className="terminal-box">
-          <div className="terminal-header">
-            <div className="terminal-dots"><span/><span/><span/></div>
-            <span>Windows Eingabeaufforderung / PowerShell</span>
-          </div>
-          <div className="terminal-body">
-            <div className="terminal-line"><span className="prompt">C:\&gt;</span> <code>Win-Printer-Connect.bat</code></div>
-          </div>
-          <div className="terminal-footer">
-            <p><strong>Funktionsweise:</strong> Führt <code>install.ps1</code> aus (HP Universal Driver PCL 6) &rarr; richtet Drucker über <code>printui.dll</code> ein (Druckername: <code>FDU</code>).</p>
-          </div>
-        </div>}
-        {guide==="beamerAirserver"&&<a className="peer-pdf" href="/downloads/anleitung-beamer-unterrichtsraum.pdf" target="_blank" rel="noreferrer"><span>PDF · 2 SEITEN</span><strong>Beamer- und AirServer-Anleitung öffnen ↗</strong><small>Anlage, Quellenwahl, Projektor, Monitor und AirServer im Unterrichtsraum</small></a>}
-        {guide==="profile"&&current===0&&<a className="template-download" href="/downloads/mein-kurzprofil-vorlage.docx" download>Word-Gestaltungsvorlage herunterladen ↓</a>}
-        {guide==="shortcuts"&&current===steps.length-1&&<a className="further-tasks" href="/downloads/shortcut-uebersicht-programmieren.pdf" target="_blank" rel="noreferrer">Weitere Shortcut-Aufgaben und Übersicht als PDF öffnen ↗</a>}
-        {guide==="ugWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("officeMobile")}>Mit Schritt 02 weiter <span>→</span></button>}
-        {guide==="kgWorkflow"&&<button className="workflow-next" onClick={()=>openGuide("wlan")}>Mit Schritt 02 weiter <span>→</span></button>}
+        {(step.links||[]).filter(l=>l.style==="next"&&l.guide).map((l,k)=><button key={k} className="workflow-next" onClick={()=>openGuide(l.guide as GuideKey)}>{l.label} <span>→</span></button>)}
         {step.in2Mobile&&<section className="in2-codes" aria-label="IN2 Mobile herunterladen"><a href="https://apps.apple.com/ch/app/in2-mobile/id1560963697" target="_blank" rel="noreferrer"><img src="/screenshots/kg-intranet/in2-mobile-iphone-qr.png" alt="QR-Code für IN2 Mobile im Apple App Store"/><strong>iPhone</strong><span>App Store öffnen ↗</span></a><a href="https://play.google.com/store/apps/details?id=net.gyselroth.in2mobile&hl=de_CH" target="_blank" rel="noreferrer"><img src="/screenshots/kg-intranet/in2-mobile-android-qr.png" alt="QR-Code für IN2 Mobile bei Google Play"/><strong>Android</strong><span>Google Play öffnen ↗</span></a></section>}
-        {(guide==="eduzh"||guide==="eduzhNoPhone")&&step.phase==="Kennwort"&&<aside className="password-box"><strong>Konkretes Beispiel</strong><code>Wolke!Kanu7Tisch-Lama</code><p>Vier unerwartete Wörter, Gross-/Kleinbuchstaben, Zahl und Sonderzeichen. Erfinden Sie unbedingt Ihr eigenes Beispiel und verwenden Sie es nur für dieses Konto.</p></aside>}
-        {current===steps.length-1&&<div className="finish-block"><div className="success">Anleitung abgeschlossen</div>{(guide==="eduzh"||guide==="eduzhNoPhone")?<div className="path-choice"><strong>Wählen Sie Ihren Schulweg</strong><div><a href={guidePaths.ugWorkflow} onClick={event=>{event.preventDefault();openGuide("ugWorkflow")}}>Untergymnasium →</a><a href={guidePaths.kgWorkflow} onClick={event=>{event.preventDefault();openGuide("kgWorkflow")}}>Kurzzeitgymnasium / HMS →</a></div></div>:!["klpCalendar","klpFobizz","peerSupport","beamerAirserver",...absenceGuides].includes(guide)&&<><a className="moodle" href="https://moodle.kst-fdu.ch/course/view.php?id=4" target="_blank" rel="noreferrer">In Moodle als erledigt markieren ↗</a><p className="moodle-flow">Öffnen Sie in Moodle den nächsten Link. Er führt Sie zurück zu dieser Seite zum nächsten Schritt.</p></>}</div>}
+        {step.box&&<aside className="password-box">{step.box.title&&<strong>{step.box.title}</strong>}{step.box.code&&<code>{step.box.code}</code>}{step.box.text&&<p>{step.box.text}</p>}</aside>}
+        {current===steps.length-1&&<div className="finish-block"><div className="success">{finish.success||"Anleitung abgeschlossen"}</div>{!!finish.choices?.length&&<div className="path-choice">{finish.title&&<strong>{finish.title}</strong>}<div>{finish.choices.map((c,k)=><a key={k} {...guideTarget(c.guide)}>{c.label}</a>)}</div></div>}{finish.moodle&&<><a className="moodle" href={finish.moodle.href} target="_blank" rel="noreferrer">{finish.moodle.label}</a>{finish.moodle.text&&<p className="moodle-flow">{finish.moodle.text}</p>}</>}</div>}
         <div className="actions"><button className="back" onClick={()=>go(current-1)} disabled={current===0}>← Zurück</button><button className="next" onClick={()=>go(current+1)} disabled={current===steps.length-1}>{current===steps.length-2?"Zum Abschluss":"Weiter"} <span>→</span></button></div>
         {pdfHref&&<a className="pdf-download" href={pdfHref}>↗ Aktuelle Anleitung als PDF öffnen</a>}
         <p className="keyboard"><span className="desktop-hint">Mit den Pfeiltasten navigieren.</span><span className="mobile-hint">Nach links oder rechts wischen.</span></p>

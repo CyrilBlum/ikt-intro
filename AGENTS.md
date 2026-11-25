@@ -12,11 +12,25 @@ Projektwissen für Agents. Gilt zusätzlich zu den globalen Anweisungen.
 
 ## Architektur
 
-- Gesamte App in `app/page.tsx` (Client-Komponente, kein Router):
-  - `Step`-Arrays je Anleitung (`image`, `phase`, `title`, `text`, `tip` …).
-  - `GuideKey` (Union-Typ), `guideNames`, `guidePaths`, `guideDescriptions`,
-    `getGuideSteps()` und der `steps`-`useMemo` müssen bei einer neuen Anleitung
-    alle ergänzt werden.
+- Texte aller Anleitungen in `app/content.json` (`guides`: Name und
+  Beschreibung je `GuideKey`, `lists`: Schrittlisten mit `label` und `steps`,
+  Felder `image`, `phase`, `title`, `text`, `tip` …). Alle Zusatzelemente sind
+  Daten, nicht Code: je Schritt `links` (Stile link, pdf, download, further,
+  next), `callout`, `box`, `launch`, `downloads`, `terminal`, `flow`, `legend`,
+  `existing…`; je Liste `pdf`, `finish` (Abzweigungen `choices`, `moodle`) und
+  `visual` (Texte des Bildbereichs ohne Screenshot). Keine neuen
+  `guide==="…"`-Sonderfälle in `page.tsx` einbauen, sondern ein Datenfeld.
+- Editor: Tab «Anleitungen» im Admin-Portal des Infomonitors
+  (`https://ikt.in-form-atik.ch/admin`, Repo `CyrilBlum/infomonitor`). Dort
+  gespeicherte Fassungen liegen auf dem Server (`/var/lib/infomonitor/ikt-content.json`)
+  und überdecken beim Laden `app/content.json` (`/infomonitor/api/ikt/content`).
+  Wer `app/content.json` ändert, prüft zuerst, ob im Editor eine Fassung
+  gespeichert ist, und übernimmt sie (Export «Als JSON herunterladen»), sonst
+  bleiben die Repo-Änderungen unsichtbar.
+- Darstellung und Logik in `app/page.tsx` (Client-Komponente, kein Router):
+  - `GuideKey` (Union-Typ), `guidePaths`, `getGuideSteps()` sowie Name und
+    Beschreibung in `content.json` müssen bei einer neuen Anleitung alle
+    ergänzt werden.
   - `navigationGroups` definiert Menügruppen/«Tabs» (z. B. `LP`, `/lehrpersonen`)
     inkl. Übersichtsseite.
   - Liste `desktopAppGuide` steuert die Darstellung von Desktop-Screenshots;
@@ -25,8 +39,10 @@ Projektwissen für Agents. Gilt zusätzlich zu den globalen Anweisungen.
 - `app/[...path]/page.tsx` re-exportiert die Startseite (Deep Links).
 - Screenshots: `public/screenshots/<bereich>/…` (z. B. `kg-intranet/real/`,
   `klp/fobizz/`).
-- PDFs: `scripts/build_guide_pdfs.py` → `output/pdf/`.
-- Build: `npm run build` (vinext) bzw. `npm run build:static` (`dist-static/`).
+- PDFs: `scripts/build_guide_pdfs.py` (liest `app/content.json`, ohne Editor-Änderungen) → `output/pdf/`.
+- Build und Deploy: `npm run build:static` (`dist-static/`, kopiert `content.json` mit), dann
+  `rsync -a dist-static/ hetzner:/mnt/HC_Volume_100926434/www/ikt.in-form-atik.ch/public_html/`
+  (ohne `--delete`). Betriebsdoku: `../../Dokumentation ikt.in-form-atik.ch/`.
 
 ## Intranet (IN2, https://in2.tam.ch)
 

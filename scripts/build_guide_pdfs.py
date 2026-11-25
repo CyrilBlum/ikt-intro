@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import html
+import json
 import re
 import shutil
 from pathlib import Path
@@ -14,7 +15,7 @@ from reportlab.platypus import Paragraph
 from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "app" / "page.tsx"
+SOURCE = ROOT / "app" / "content.json"
 OUTPUT = ROOT / "output" / "pdf"
 PUBLIC = ROOT / "public" / "pdfs"
 PAPER = white
@@ -26,13 +27,9 @@ PALE = HexColor("#e0e7bc")
 LINE = HexColor("#d9dfd1")
 
 def parse_steps(name):
-    text = SOURCE.read_text(encoding="utf-8")
-    block = re.search(rf"const {name}: Step\[\] = \[(.*?)\n\];", text, re.S).group(1)
-    steps = []
-    for raw in re.findall(r"\{[^\n]+\}", block):
-        values = dict(re.findall(r'(\w+):"([^"]*)"', raw))
-        steps.append(values)
-    return steps
+    # Texts as in the repository (app/content.json); changes made in the edit GUI are not included.
+    steps = json.loads(SOURCE.read_text(encoding="utf-8"))["lists"][name]["steps"]
+    return [{k: v for k, v in step.items() if isinstance(v, str)} for step in steps]
 
 def safe(text):
     return html.escape(text).replace("–", "-").replace("—", "-")
